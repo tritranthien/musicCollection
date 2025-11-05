@@ -1,7 +1,8 @@
-import { redirect } from "react-router";
+import { Form, redirect, useActionData, useFetcher } from "react-router";
 import { useForm } from "react-hook-form";
 import styles from "../LoginForm.module.css";
 import Logo from "../../logo/Logo";
+import { useEffect, useState } from "react";
 
 export async function action({ request }) {
   const formData = await request.formData();
@@ -9,34 +10,31 @@ export async function action({ request }) {
   const password = formData.get("password");
 
   if (email !== "test@example.com" || password !== "123456") {
-    return json({ error: "Email hoặc mật khẩu không đúng" }, { status: 400 });
+    return { error: "Email hoặc mật khẩu không đúng", status: 400 };
   }
 
   return redirect("/dashboard");
 }
 
-export default function LoginPage({ actionData }) {
+export default function LoginPage() {
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm();
-
+  const fetcher = useFetcher();
   const onSubmit = (data) => {
-    const form = document.getElementById("remix-form");
-    for (const key in data) {
-      form.elements[key].value = data[key];
-    }
-    form.requestSubmit();
+    const form = new FormData();
+    form.append("email", data.email);
+    form.append("password", data.password);
+    fetcher.submit(form, { method: "post" });
   };
-
   return (
     <div className={styles.container}>
       <div className={styles.content}>
         <Logo />
-        <form id="remix-form" method="post" className={styles.form} onSubmit={handleSubmit(onSubmit)}>
+        <Form className={styles.form} onSubmit={handleSubmit(onSubmit)}>
           <h2 className={styles.title}>Đăng nhập</h2>
-
           <div className={styles.field}>
             <label>Email</label>
             <input
@@ -57,7 +55,7 @@ export default function LoginPage({ actionData }) {
             {errors.password && <p className={styles.error}>{errors.password.message}</p>}
           </div>
 
-          {actionData?.error && <p className={styles.error}>{actionData.error}</p>}
+          {fetcher.data?.error && <p className={styles.error}>{fetcher.data.error}</p>}
 
           <button type="submit" className={styles.button} disabled={isSubmitting}>
             {isSubmitting ? "Đang đăng nhập..." : "Đăng nhập"}
@@ -71,7 +69,7 @@ export default function LoginPage({ actionData }) {
               Đăng ký ngay
             </a>
           </p>
-        </form>
+        </Form>
       </div>
     </div>
   );

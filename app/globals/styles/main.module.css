@@ -1,0 +1,75 @@
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #f9fafb;
+  font-family: system-ui, sans-serif;
+}
+
+/* Header */
+.header {
+  background: #1f2937;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.8rem 1.5rem;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.logoText {
+  font-family: "Pacifico", cursive;
+  font-size: 1.3rem;
+  color: #facc15;
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.logoutBtn {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s;
+}
+
+.logoutBtn:hover {
+  background: #dc2626;
+}
+
+/* Layout */
+.layout {
+  display: flex;
+  flex: 1;
+  height: calc(100vh - 60px);
+}
+
+.sidebar {
+  width: 260px;
+  background: #fff;
+  border-right: 1px solid #e5e7eb;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.sidebarTitle {
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.main {
+  flex: 1;
+  padding: 2rem;
+}

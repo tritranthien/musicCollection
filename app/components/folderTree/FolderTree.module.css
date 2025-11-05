@@ -1,0 +1,137 @@
+.dashboard {
+  background: #f9fafb;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main {
+  padding: 2rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.tree {
+  font-family: system-ui, sans-serif;
+  font-size: 0.95rem;
+  color: #374151;
+}
+
+.node {
+  margin-left: 0.3rem;
+}
+
+.label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.label:hover {
+  background: #eef2ff;
+}
+
+.children {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-5px);
+  transition: all 0.3s ease;
+}
+
+
+.file {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.file:hover {
+  background: #f3f4f6;
+  border-radius: 4px;
+}
+.rootContainer {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.rootHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.rootBlock {
+  margin-bottom: 6px;
+}
+
+.rootLine {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 2px 4px;
+  border-radius: 6px;
+}
+.rootLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+.rootText {
+  font-weight: 600;
+  color: #111827;
+}
+.rootControls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.rootChildren {
+  margin-left: 8px; /* sát hơn so với trước */
+}
+
+/* nút collapse nhỏ gọn */
+.collapseBtn {
+  background: transparent;
+  border: 1px solid rgba(0,0,0,0.06);
+  padding: 4px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #374151;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.collapseBtn:hover {
+  background: rgba(0,0,0,0.03);
+  color: #111827;
+}
+
+.selected {
+  background-color: rgba(59, 130, 246, 0.15); /* xanh nhạt */
+  border-left: 3px solid #3b82f6;
+  color: #1e3a8a;
+  font-weight: 600;
+}
+
+.expand {
+  max-height: 500px; /* đủ lớn để chứa nội dung */
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.collapse {
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-5px);
+}

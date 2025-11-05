@@ -4,14 +4,21 @@
   "type": "module",
   "scripts": {
     "build": "react-router build",
-    "dev": "react-router dev",
+    "dev": "cross-env NODE_ENV=development react-router dev",
     "start": "react-router-serve ./build/server/index.js",
-    "typecheck": "react-router typegen && tsc"
+    "typecheck": "react-router typegen && tsc",
+    "create-admin": "node scripts/admin.js"
   },
   "dependencies": {
+    "@prisma/client": "^6.18.0",
     "@react-router/node": "^7.9.2",
     "@react-router/serve": "^7.9.2",
+    "bcryptjs": "^3.0.3",
     "isbot": "^5.1.31",
+    "jsonwebtoken": "^9.0.2",
+    "lucide-react": "^0.552.0",
+    "mongodb": "^6.20.0",
+    "prisma": "^6.18.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-hook-form": "^7.66.0",
@@ -23,6 +30,7 @@
     "@types/node": "^22",
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
+    "cross-env": "^10.1.0",
     "tailwindcss": "^4.1.13",
     "typescript": "^5.9.2",
     "vite": "^7.1.7",
