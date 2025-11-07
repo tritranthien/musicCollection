@@ -1,4 +1,4 @@
-import { BaseModel } from "./baseModel.server";
+import { BaseModel } from "./base";
 
 export class UserModel extends BaseModel {
   constructor() {

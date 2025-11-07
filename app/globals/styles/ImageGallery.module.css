@@ -1,0 +1,184 @@
+.container {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 1.5rem;
+  padding: 1.5rem;
+}
+
+.leftPane {
+  display: flex;
+  flex-direction: column;
+}
+
+.rightPane {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.2rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  background: white;
+  border-radius: 10px;
+  padding: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  transition: transform 0.2s;
+  text-align: center;
+  overflow: hidden;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+}
+
+.thumbnail {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.iconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 140px;
+  background: #f3f4f6;
+  border-radius: 6px;
+}
+
+.fileIcon {
+  width: 50px;
+  height: 50px;
+  color: #6366f1;
+}
+
+.meta {
+  margin-top: 0.5rem;
+}
+
+.filename {
+  display: block;
+  font-weight: 500;
+  color: #374151;
+  word-break: break-word;
+}
+
+.size {
+  color: #9ca3af;
+  font-size: 0.8rem;
+}
+.typeTag {
+  display: inline-block;
+  margin-top: 0.3rem;
+  background: #eef2ff;
+  color: #4f46e5;
+  font-size: 0.75rem;
+  padding: 2px 6px;
+  border-radius: 6px;
+  text-transform: uppercase;
+}
+.imageWrapper {
+  width: 100%;
+  max-height: 240px; /* Giới hạn chiều cao để list gọn gàng */
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f9fafb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.imageCover {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* Giữ tỉ lệ ảnh thật */
+  background-color: #f9fafb;
+  transition: transform 0.3s ease;
+}
+
+.imageWrapper:hover .imageCover {
+  transform: scale(1.02);
+}
+
+.videoWrapper {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #000;
+}
+
+.iconWrapper {
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f3f4f6;
+  border-radius: 12px;
+}
+
+.fileIcon {
+  width: 40px;
+  height: 40px;
+  color: #4b5563;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  transition: transform 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+}
+
+.imageWrapper {
+  width: 100%;
+  height: 180px; /* ✅ chiều cao cố định */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f9fafb;
+}
+
+.imageCover {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain; /* Giữ đúng tỉ lệ */
+}
+
+.meta {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.85rem;
+  color: #4b5563;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+

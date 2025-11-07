@@ -11,7 +11,7 @@ export async function action({ request }) {
   const confirmPassword = formData.get("confirmPassword");
 
   if (password !== confirmPassword) {
-    return json({ error: "Mật khẩu xác nhận không khớp" }, { status: 400 });
+    return Response.json({ error: "Mật khẩu xác nhận không khớp" }, { status: 400 });
   }
 
   return redirect("/login");

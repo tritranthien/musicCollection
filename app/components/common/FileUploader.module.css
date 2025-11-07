@@ -1,0 +1,97 @@
+.input {
+  display: none;
+}
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dropZone {
+  width: 220px;
+  height: 180px;
+  border: 2px dashed #d1d5db;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: #fafafa;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  position: relative;
+  text-align: center;
+}
+
+.dropZone:hover {
+  border-color: #818cf8;
+  background: #f9fafb;
+}
+
+.icon {
+  font-size: 2rem;
+  color: #6366f1;
+  margin-bottom: 0.2rem; /* giảm bớt khoảng cách để cân */
+  line-height: 1; /* giúp icon và text canh giữa chuẩn */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.text {
+  color: #6b7280;
+  font-size: 0.85rem;
+  margin-top: 0.2rem;
+}
+
+.media {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.audioPreview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 1.4rem;
+}
+
+.fileIcon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #4b5563;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.bigIcon {
+  font-size: 2rem;
+  margin-bottom: 0.4rem;
+}
+
+.fileInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 220px;
+  font-size: 0.85rem;
+  color: #374151;
+  background: #f3f4f6;
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+}
+
+.removeBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #ef4444;
+  font-size: 1.1rem;
+}

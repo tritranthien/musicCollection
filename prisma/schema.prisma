@@ -32,9 +32,11 @@ model File {
   id         String   @id @default(auto()) @map("_id") @db.ObjectId
   filename   String
   url        String
-  mimeType   String
+  type   String
   size       Int
+  src        String?
+  detail     Json?
+  lesson     String[] @default([])
   ownerId    String?  @db.ObjectId
-  lessonId   String?  @db.ObjectId
   createdAt  DateTime @default(now())
 }

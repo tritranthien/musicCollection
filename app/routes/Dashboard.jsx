@@ -23,7 +23,7 @@ export async function loader({ request }) {
     name: `Lớp ${i + 1}`,
     children: classChildren.map((item) => ({
       ...item,
-      id: `${item.id}-class-${i + 1}`,
+      id: `${i + 1}/${item.id}`,
     })),
   }));
 

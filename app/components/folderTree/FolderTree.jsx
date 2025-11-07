@@ -222,7 +222,7 @@ function TreeNodeLower({ node, collapseSignal, selectedId, setSelectedId }) {
         {/* leaf may not have chevron */}
         {hasChildren ? (open ? <ChevronDown size={12} /> : <ChevronRight size={12} />) : <span style={{ width: 12 }} />}
         {!hideFolderIcon && <Folder size={12} color="#f59e0b" />}
-        <Link to={`/dashboard/class/${node.id}/lesson`}>{node.name}</Link>
+        <Link to={`/dashboard/class/${node.id}`}>{node.name}</Link>
       </div>
 
       {/* if this lower node has children, render them (rare in our structure) */}

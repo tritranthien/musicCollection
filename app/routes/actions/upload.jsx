@@ -1,25 +1,17 @@
-import fs from "fs/promises";
-import path from "path";
+import { FileModel } from "../../.server/fileUpload.repo";
+import { getUser } from "../../service/auth.server";
 
-export async function action({ request }) {
+export const action = async ({ request, params }) => {
   try {
     const formData = await request.formData();
     const file = formData.get("file");
-
-    if (!file || typeof file === "string") {
-      return { error: "Vui lòng chọn file để tải lên" };
-    }
-
-    const uploadsDir = path.join(process.cwd(), "app", "uploads");
-    await fs.mkdir(uploadsDir, { recursive: true });
-
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const filePath = path.join(uploadsDir, file.name);
-    await fs.writeFile(filePath, buffer);
-
-    return { success: `Đã tải lên: ${file.name}` };
+    const folder = params.path || "general";
+    let user = await getUser(request);
+    const fieldModel = new FileModel();
+    const uploaded = await fieldModel.uploadFileToCloudinary(file, folder, user.id);
+    return { success: true, file: uploaded };
   } catch (err) {
-    console.error(err);
-    return { error: "Lỗi khi tải file" };
+    console.error("Upload failed:", err);
+    return { error: err.message };
   }
-}
+};

@@ -41,4 +41,12 @@ export class BaseModel {
   async count(where = {}) {
     return this.model.count({ where });
   }
+
+  async findMany(where = {}, options = {}) {
+    return this.model.findMany({
+      where,
+      ...options,
+    });
+  }
 }
+export default BaseModel;
