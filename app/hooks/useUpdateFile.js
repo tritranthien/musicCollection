@@ -14,7 +14,7 @@ export default function useUpdateFile() {
 
       try {
         setError(null);
-        fetcher.submit(data, {
+        fetcher.submit(JSON.stringify(data), {
           method: "post",
           action: url,
           encType: "application/json",

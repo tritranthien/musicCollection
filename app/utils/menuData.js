@@ -28,5 +28,16 @@ export const menuData = [
     path: '/chuong-trinh-hoc',
     icon: '👥',
     children: generateGradeMenuData()
+  },
+  {
+    label: 'Sưu tập',
+    path: '/suu-tap',
+    icon: '👥',
+    children: [
+      { icon: '🎬', label: 'Video', path: `/bang-dieu-khien/suu-tap/video` },
+      { icon: '🖼️', label: 'Hình ảnh', path: `/bang-dieu-khien/suu-tap/hinh-anh` },
+      { icon: '🎧', label: 'Âm thanh', path: `/bang-dieu-khien/suu-tap/am-thanh` },
+      { icon: '📄', label: 'Tài liệu', path: `/bang-dieu-khien/suu-tap/tai-lieu` },
+    ]
   }
 ];

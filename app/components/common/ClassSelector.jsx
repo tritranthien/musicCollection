@@ -23,6 +23,12 @@ export default function ClassSelector({ selected = [], onChange, fixedClasses = 
     onChange?.(newSelection);
   };
 
+  const removeClass = (cls) => {
+    if (fixedClasses) return; // không thể xóa khi cố định
+    const newSelection = selected.filter((c) => c !== cls);
+    onChange?.(newSelection);
+  };
+
   const displayClasses = fixedClasses || selected;
 
   return (
@@ -33,7 +39,19 @@ export default function ClassSelector({ selected = [], onChange, fixedClasses = 
       >
         {displayClasses.length > 0 ? (
           displayClasses.map((cls) => (
-            <span key={cls} className={styles.tag}>Lớp {cls}</span>
+            <span key={cls} className={styles.tag} onClick={(e) => e.stopPropagation()}>
+              Lớp {cls}
+              {/* Hiển thị nút xóa nếu không có fixedClasses */}
+              {!fixedClasses && (
+                <button
+                  type="button"
+                  className={styles.removeBtn}
+                  onClick={() => removeClass(cls)}
+                >
+                  ×
+                </button>
+              )}
+            </span>
           ))
         ) : (
           <span className={styles.placeholder}>Chọn lớp...</span>

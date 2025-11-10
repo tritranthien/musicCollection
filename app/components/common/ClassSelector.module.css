@@ -26,10 +26,13 @@
 }
 
 .tag {
-  background: #2563eb;
-  color: white;
-  border-radius: 6px;
-  padding: 4px 8px;
+  display: inline-flex;
+  align-items: center;
+  background-color: #eef2ff;
+  color: #1e3a8a;
+  border-radius: 8px;
+  padding: 2px 8px;
+  margin: 2px;
   font-size: 13px;
 }
 
@@ -65,4 +68,17 @@
 .option.active {
   background: #dbeafe;
   font-weight: 600;
+}
+.removeBtn {
+  background: transparent;
+  border: none;
+  color: #6b7280;
+  margin-left: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.removeBtn:hover {
+  color: #ef4444;
 }

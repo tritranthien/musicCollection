@@ -62,5 +62,11 @@ export class FileModel extends BaseModel {
   async deleteByLesson(lessonId) {
     return this.model.deleteMany({ where: { lessonId } });
   }
+  async updateFile(fileId, data) {
+    if (!fileId) throw new Error("File ID is required");
+    if (!data) throw new Error("Data is required");
+    if (data.id) delete data.id;
+    return this.model.update({ where: { id: fileId }, data });
+  }
 }
 export default FileModel;

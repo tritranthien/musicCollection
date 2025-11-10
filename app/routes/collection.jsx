@@ -31,12 +31,11 @@ export async function loader({ params }) {
   }
   const query = {};
   if (fileType) query.type = typeMap[fileType];
-  if (classMate) query.classes = { has: Number(classMate) };
   const files = await fileModel.findAll(query);
-  return Response.json({ files, fileType, classMate });
+  return Response.json({ files, fileType });
 }
 
 export default function FileLibraryPage() {
-  const { files, fileType, classMate } = useLoaderData();
-  return <FileLibraryLayout files={files} fileType={fileType} classMate={classMate} accept={acceptMap[fileType]} />;
+  const { files, fileType } = useLoaderData();
+  return <FileLibraryLayout files={files} fileType={fileType} accept={acceptMap[fileType]} />;
 }
