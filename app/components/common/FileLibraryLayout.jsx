@@ -8,6 +8,7 @@ import FileUploader from "./FileUploader.jsx";
 import useUpdateFile from "../../hooks/useUpdateFile.js";
 import useUpload from "../../hooks/useUpload.js";
 import { DeleteModal } from "../folderTree/modal/DeleteModal.jsx";
+import { FileFilter } from "../filter/FileFilter.jsx";
 
 export default function FileLibraryPage({ files, fileType = "raw", classMate = null, accept = "*/*", category = null }) {
   const [isModalOpen, setModalOpen] = useState(false);
@@ -130,15 +131,23 @@ export default function FileLibraryPage({ files, fileType = "raw", classMate = n
       description,
     });
   };
-
+  const handleFilterChange = (filters) => {
+    console.log('Filters:', filters);
+  };
   return (
-    <div className={styles.container}>
+    <>
+      <div className={styles.header}>
+        <h2>📁 Thư viện tệp</h2>
+      </div>
+      <div className={styles.filterContainer}>
+        <FileFilter
+          onFilterChange={handleFilterChange}
+          initialFilters={{}}
+        />
+      </div>
+      <div className={styles.container}>
       {/* LEFT SIDE */}
       <div className={styles.leftPane}>
-        <div className={styles.header}>
-          <h2>📁 Thư viện tệp</h2>
-        </div>
-
         {files.length === 0 ? (
           <p className={styles.empty}>Chưa có tệp nào được tải lên</p>
         ) : (
@@ -304,5 +313,6 @@ export default function FileLibraryPage({ files, fileType = "raw", classMate = n
         />
       </div>
     </div>
+    </>
   );
 }

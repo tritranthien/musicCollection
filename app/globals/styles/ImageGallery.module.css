@@ -353,3 +353,7 @@
   cursor: pointer;
   transition: background 0.25s;
 }
+.filterContainer {
+  padding: 1rem;
+  padding-bottom: 0;
+}
