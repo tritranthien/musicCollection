@@ -16,4 +16,5 @@ export default [
     route("updateFile", "routes/actions/updateFile.jsx"),
     route("deleteFile", "routes/actions/deleteFile.jsx"),
     route("api/category", "routes/actions/category.jsx"),
+    route("api/filterFile", "routes/actions/filterFile.jsx"),
 ] satisfies RouteConfig;

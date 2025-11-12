@@ -20,7 +20,14 @@ const viTypemap = {
     "hinh-anh": "images",
     "tai-lieu": "documents",
     "video": "videos",
-    "bai-giang": "lectures",
+    "lectures": "lectures",
+}
+const viNameMap = {
+    "audios": "Âm thanh",
+    "images": "Hình ảnh",
+    "documents": "Tài liệu",
+    "videos": "Video",
+    "lectures": "Bài giảng",
 }
 export async function loader({ params }) {
   let fileType = params.file_type;
@@ -32,11 +39,12 @@ export async function loader({ params }) {
   const query = {};
   if (fileType) query.type = typeMap[fileType];
   if (classMate) query.classes = { has: Number(classMate) };
-  const files = await fileModel.findAll(query);
+  const files = await fileModel.findWithFilters(query);
   return Response.json({ files, fileType, classMate });
 }
 
 export default function FileLibraryPage() {
   const { files, fileType, classMate } = useLoaderData();
-  return <FileLibraryLayout files={files} fileType={fileType} classMate={classMate} accept={acceptMap[fileType]} />;
+  const pageName = `📁 Lớp ${classMate} / ${viNameMap[fileType]}`;
+  return <FileLibraryLayout pageName={pageName} files={files} fileType={fileType} classMate={classMate} accept={acceptMap[fileType]} />;
 }

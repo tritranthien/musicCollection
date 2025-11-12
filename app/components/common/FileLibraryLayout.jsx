@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, Download, FileText, Music, Pencil, Trash2, X } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import styles from "../../globals/styles/ImageGallery.module.css";
 import Modal from "../modals/upload/Modal.jsx";
 import ClassSelector from "./ClassSelector.jsx";
@@ -9,8 +9,14 @@ import useUpdateFile from "../../hooks/useUpdateFile.js";
 import useUpload from "../../hooks/useUpload.js";
 import { DeleteModal } from "../folderTree/modal/DeleteModal.jsx";
 import { FileFilter } from "../filter/FileFilter.jsx";
-
-export default function FileLibraryPage({ files, fileType = "raw", classMate = null, accept = "*/*", category = null }) {
+import useFilter from "../../hooks/useFileFilter.js";
+const fileTypeMap = {
+    "videos": "video",
+    "audios": "audio",
+    "images": "image",
+    "documents": "raw",
+}
+export default function FileLibraryPage({ files, fileType = "raw", classMate = null, accept = "*/*", category = null, pageName = "📁 Thư viện tệp" }) {
   const [isModalOpen, setModalOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [clickedFile, setClickedFile] = useState(null);
@@ -22,7 +28,30 @@ export default function FileLibraryPage({ files, fileType = "raw", classMate = n
   const [isEdit, setIsEdit] = useState(false);
   const { loading: updateLoading, error: updateError, data: updateData, updateFile, deleteFile } = useUpdateFile();
   const { upload, loading, error, data } = useUpload();
-
+  const initFilterGenerator = useMemo(() => {
+  let temp = {};
+  if (classMate) temp.classes = [Number(classMate)];
+  if (fileType) {
+    if (["videos", "audios", "images", "documents"].includes(fileType)) {
+      temp.types = [fileTypeMap[fileType]];
+    }
+  }
+  return temp;
+}, [classMate, fileType]);
+  const { 
+    filterResult, 
+    filtering, 
+    filter,
+    pagination,
+    nextPage,
+    previousPage,
+    goToPage,
+    changeLimit,
+    resetFilters,
+    activeFilters,
+  } = useFilter(files, '/api/filterFile', 1, 20, initFilterGenerator);
+  console.log(files, filterResult);
+  
   const handleUpload = () => {
     if (!selectedFile) return;
     const dataUpload = {
@@ -131,28 +160,40 @@ export default function FileLibraryPage({ files, fileType = "raw", classMate = n
       description,
     });
   };
-  const handleFilterChange = (filters) => {
-    console.log('Filters:', filters);
-  };
+  const handleFilterChange = useCallback((filters) => {
+    filter(filters);
+  }, [filter]);
   return (
     <>
       <div className={styles.header}>
-        <h2>📁 Thư viện tệp</h2>
+        <h2>{pageName}</h2>
       </div>
       <div className={styles.filterContainer}>
         <FileFilter
           onFilterChange={handleFilterChange}
-          initialFilters={{}}
+          initialFilters={activeFilters}
+          disabledFilters={(() => {
+            let temp = [];
+            if (classMate) {
+              temp.push('classes');
+            }
+            if (fileType) {
+              if (["videos", "audios", "images", "documents"].includes(fileType)) {
+                temp.push('types');
+              }
+            }
+            return temp;
+          })()}
         />
       </div>
       <div className={styles.container}>
       {/* LEFT SIDE */}
       <div className={styles.leftPane}>
-        {files.length === 0 ? (
+        {filterResult.length === 0 ? (
           <p className={styles.empty}>Chưa có tệp nào được tải lên</p>
         ) : (
           <div className={styles.grid}>
-            {files.map((file) => (
+            {filterResult.map((file) => (
               <motion.div
                 key={file.id}
                 className={`${styles.card} ${clickedFile?.id === file.id ? styles.activeCard : ""}`}

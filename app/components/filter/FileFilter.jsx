@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Search, X, Filter, Calendar, FileType, User, GraduationCap } from 'lucide-react';
 
-export const FileFilter = ({ onFilterChange, initialFilters = {} }) => {
+export const FileFilter = ({ onFilterChange, initialFilters = {}, disabledFilters = [] }) => {
   const [filters, setFilters] = useState({
     search: '',
     types: [], // Thay đổi từ type sang types (array)
@@ -13,7 +13,8 @@ export const FileFilter = ({ onFilterChange, initialFilters = {} }) => {
     maxSize: '',
     ...initialFilters
   });
-
+  const isFirstRender = useRef(true);
+  const isDisabled = (field) => disabledFilters.includes(field);
   const [isExpanded, setIsExpanded] = useState(false);
 
   // File types phổ biến
@@ -21,32 +22,40 @@ export const FileFilter = ({ onFilterChange, initialFilters = {} }) => {
     { value: 'image', label: 'Hình ảnh' },
     { value: 'video', label: 'Video' },
     { value: 'audio', label: 'Audio' },
-    { value: 'document', label: 'Tài liệu' },
-    { value: 'pdf', label: 'PDF' },
-    { value: 'zip', label: 'ZIP/Archive' },
-    { value: 'other', label: 'Khác' }
+    { value: 'raw', label: 'Tài liệu' },
   ];
 
   // Danh sách lớp (có thể thay đổi theo nhu cầu)
   const classes = [
-    { value: '10A1', label: 'Lớp 10A1' },
-    { value: '10A2', label: 'Lớp 10A2' },
-    { value: '11A1', label: 'Lớp 11A1' },
-    { value: '11A2', label: 'Lớp 11A2' },
-    { value: '12A1', label: 'Lớp 12A1' },
-    { value: '12A2', label: 'Lớp 12A2' }
+    { value: 1, label: 'Lớp 1' },
+    { value: 2, label: 'Lớp 2' },
+    { value: 3, label: 'Lớp 3' },
+    { value: 4, label: 'Lớp 4' },
+    { value: 5, label: 'Lớp 5' },
+    { value: 6, label: 'Lớp 6' },
+    { value: 7, label: 'Lớp 7' },
+    { value: 8, label: 'Lớp 8' },
+    { value: 9, label: 'Lớp 9' },
+    { value: 10, label: 'Lớp 10' },
+    { value: 11, label: 'Lớp 11' },
+    { value: 12, label: 'Lớp 12' },
   ];
 
   useEffect(() => {
     // Debounce để tránh call API quá nhiều
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
     const timeoutId = setTimeout(() => {
       onFilterChange(filters);
     }, 500);
 
     return () => clearTimeout(timeoutId);
-  }, [filters, onFilterChange]);
+  }, [filters]);
 
   const handleChange = (field, value) => {
+    if (isDisabled(field)) return;
     setFilters(prev => ({
       ...prev,
       [field]: value
@@ -57,7 +66,7 @@ export const FileFilter = ({ onFilterChange, initialFilters = {} }) => {
     setFilters(prev => {
       const currentArray = prev[field] || [];
       const isSelected = currentArray.includes(value);
-      
+
       return {
         ...prev,
         [field]: isSelected
@@ -66,30 +75,29 @@ export const FileFilter = ({ onFilterChange, initialFilters = {} }) => {
       };
     });
   };
-
   const clearFilters = () => {
-    const clearedFilters = {
-      search: '',
-      types: [],
-      classes: [],
-      dateFrom: '',
-      dateTo: '',
-      ownerName: '',
-      minSize: '',
-      maxSize: ''
-    };
+    const clearedFilters = Object.keys(filters).reduce((acc, key) => {
+      if (isDisabled(key)) {
+        acc[key] = filters[key]; // giữ nguyên filter bị disable
+      } else {
+        // reset các filter khác
+        if (Array.isArray(filters[key])) acc[key] = [];
+        else acc[key] = '';
+      }
+      return acc;
+    }, {});
     setFilters(clearedFilters);
   };
 
   const hasActiveFilters = () => {
-    return filters.search !== '' || 
-           filters.types.length > 0 || 
-           filters.classes.length > 0 ||
-           filters.dateFrom !== '' || 
-           filters.dateTo !== '' || 
-           filters.ownerName !== '' || 
-           filters.minSize !== '' || 
-           filters.maxSize !== '';
+    return filters.search !== '' ||
+      filters.types.length > 0 ||
+      filters.classes.length > 0 ||
+      filters.dateFrom !== '' ||
+      filters.dateTo !== '' ||
+      filters.ownerName !== '' ||
+      filters.minSize !== '' ||
+      filters.maxSize !== '';
   };
 
   const getActiveFilterCount = () => {
@@ -121,18 +129,18 @@ export const FileFilter = ({ onFilterChange, initialFilters = {} }) => {
             type="text"
             placeholder="Tìm kiếm theo tên file, mô tả..."
             value={filters.search}
+            disabled={isDisabled('search')}
             onChange={(e) => handleChange('search', e.target.value)}
             className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-sm"
           />
         </div>
-        
+
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className={`flex items-center gap-1.5 px-3 py-2 rounded-lg border transition-all text-sm ${
-            isExpanded || hasActiveFilters()
+          className={`flex items-center gap-1.5 px-3 py-2 rounded-lg border transition-all text-sm ${isExpanded || hasActiveFilters()
               ? 'bg-blue-50 border-blue-300 text-blue-700'
               : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-          }`}
+            }`}
         >
           <Filter className="w-4 h-4" />
           <span className="font-medium">Lọc</span>
@@ -173,6 +181,7 @@ export const FileFilter = ({ onFilterChange, initialFilters = {} }) => {
                         type="checkbox"
                         checked={filters.types.includes(type.value)}
                         onChange={() => toggleArrayFilter('types', type.value)}
+                        disabled={isDisabled('types')}
                         className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                       />
                       <span className="text-sm text-gray-700">{type.label}</span>
@@ -201,6 +210,7 @@ export const FileFilter = ({ onFilterChange, initialFilters = {} }) => {
                         type="checkbox"
                         checked={filters.classes.includes(cls.value)}
                         onChange={() => toggleArrayFilter('classes', cls.value)}
+                        disabled={isDisabled('classes')}
                         className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                       />
                       <span className="text-sm text-gray-700">{cls.label}</span>
@@ -229,6 +239,7 @@ export const FileFilter = ({ onFilterChange, initialFilters = {} }) => {
                 placeholder="Tìm theo tên..."
                 value={filters.ownerName}
                 onChange={(e) => handleChange('ownerName', e.target.value)}
+                disabled={isDisabled('ownerName')}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm"
               />
             </div>
@@ -243,6 +254,7 @@ export const FileFilter = ({ onFilterChange, initialFilters = {} }) => {
                 type="date"
                 value={filters.dateFrom}
                 onChange={(e) => handleChange('dateFrom', e.target.value)}
+                disabled={isDisabled('dateFrom')}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm"
               />
             </div>
@@ -257,6 +269,7 @@ export const FileFilter = ({ onFilterChange, initialFilters = {} }) => {
                 type="date"
                 value={filters.dateTo}
                 onChange={(e) => handleChange('dateTo', e.target.value)}
+                disabled={isDisabled('dateTo')}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm"
               />
             </div>
@@ -271,6 +284,7 @@ export const FileFilter = ({ onFilterChange, initialFilters = {} }) => {
                 placeholder="0"
                 value={filters.minSize ? formatFileSize(filters.minSize) : ''}
                 onChange={(e) => handleChange('minSize', e.target.value ? e.target.value * 1024 * 1024 : '')}
+                disabled={isDisabled('minSize')}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm"
               />
             </div>
@@ -285,6 +299,7 @@ export const FileFilter = ({ onFilterChange, initialFilters = {} }) => {
                 placeholder="∞"
                 value={filters.maxSize ? formatFileSize(filters.maxSize) : ''}
                 onChange={(e) => handleChange('maxSize', e.target.value ? e.target.value * 1024 * 1024 : '')}
+                disabled={isDisabled('maxSize')}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm"
               />
             </div>
@@ -296,33 +311,69 @@ export const FileFilter = ({ onFilterChange, initialFilters = {} }) => {
               {filters.search && (
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">
                   Tìm: "{filters.search}"
-                  <button onClick={() => handleChange('search', '')} className="hover:bg-blue-200 rounded-full p-0.5">
-                    <X className="w-3 h-3" />
-                  </button>
+                  {!isDisabled('search') && (
+                    <button onClick={() => handleChange('search', '')} className="hover:bg-blue-200 rounded-full p-0.5">
+                      <X className="w-3 h-3" />
+                    </button>
+                  )}
                 </span>
               )}
               {filters.types.map(type => (
                 <span key={type} className="inline-flex items-center gap-1 px-2.5 py-1 bg-purple-100 text-purple-700 rounded-full text-xs">
                   {fileTypes.find(t => t.value === type)?.label}
-                  <button onClick={() => toggleArrayFilter('types', type)} className="hover:bg-purple-200 rounded-full p-0.5">
-                    <X className="w-3 h-3" />
-                  </button>
+                  {!isDisabled('types') && (
+                    <button onClick={() => toggleArrayFilter('types', type)} className="hover:bg-purple-200 rounded-full p-0.5">
+                      <X className="w-3 h-3" />
+                    </button>
+                  )}
                 </span>
               ))}
+
               {filters.classes.map(cls => (
                 <span key={cls} className="inline-flex items-center gap-1 px-2.5 py-1 bg-green-100 text-green-700 rounded-full text-xs">
                   {classes.find(c => c.value === cls)?.label}
-                  <button onClick={() => toggleArrayFilter('classes', cls)} className="hover:bg-green-200 rounded-full p-0.5">
-                    <X className="w-3 h-3" />
-                  </button>
+                  {!isDisabled('classes') && (
+                    <button onClick={() => toggleArrayFilter('classes', cls)} className="hover:bg-green-200 rounded-full p-0.5">
+                      <X className="w-3 h-3" />
+                    </button>
+                  )}
                 </span>
               ))}
               {filters.ownerName && (
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-100 text-amber-700 rounded-full text-xs">
                   Người tạo: {filters.ownerName}
-                  <button onClick={() => handleChange('ownerName', '')} className="hover:bg-amber-200 rounded-full p-0.5">
-                    <X className="w-3 h-3" />
-                  </button>
+                  {!isDisabled('ownerName') && (
+                    <button onClick={() => handleChange('ownerName', '')} className="hover:bg-amber-200 rounded-full p-0.5">
+                      <X className="w-3 h-3" />
+                    </button>
+                  )}
+                </span>
+              )}
+              {filters.dateFrom && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs">
+                  Từ ngày: {new Date(filters.dateFrom).toLocaleDateString('vi-VN')}
+                  {!isDisabled('dateFrom') && (
+                    <button
+                      onClick={() => handleChange('dateFrom', '')}
+                      className="hover:bg-indigo-200 rounded-full p-0.5"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  )}
+                </span>
+              )}
+
+              {filters.dateTo && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs">
+                  Đến ngày: {new Date(filters.dateTo).toLocaleDateString('vi-VN')}
+                  {!isDisabled('dateTo') && (
+                    <button
+                      onClick={() => handleChange('dateTo', '')}
+                      className="hover:bg-indigo-200 rounded-full p-0.5"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  )}
                 </span>
               )}
             </div>
@@ -332,33 +383,3 @@ export const FileFilter = ({ onFilterChange, initialFilters = {} }) => {
     </div>
   );
 };
-
-// Demo component
-export default function App() {
-  const [currentFilters, setCurrentFilters] = useState(null);
-
-  return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-6xl mx-auto">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">File Filter với Multiple Selection</h1>
-        
-        <FileFilter 
-          onFilterChange={(filters) => {
-            console.log('Filters changed:', filters);
-            setCurrentFilters(filters);
-          }}
-        />
-
-        {/* Debug: Hiển thị filters hiện tại */}
-        {currentFilters && (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <h2 className="font-semibold text-gray-900 mb-2">Filters hiện tại:</h2>
-            <pre className="text-xs bg-gray-50 p-3 rounded overflow-auto">
-              {JSON.stringify(currentFilters, null, 2)}
-            </pre>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}

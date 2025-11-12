@@ -24,6 +24,9 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 1.2rem;
+  font-weight: 600;
+  font-size: 1.2rem;
+  color: #111827;
 }
 
 /* =============================
