@@ -2,10 +2,12 @@ import { createCookieSessionStorage } from "react-router";
 
 type SessionData = {
   userId: string;
+  user?: any;
 };
 
 type SessionFlashData = {
   error: string;
+  message: string;
 };
 
 const { getSession, commitSession, destroySession } =
@@ -16,13 +18,12 @@ const { getSession, commitSession, destroySession } =
         name: "__session",
 
         // all of these are optional
-        domain: "reactrouter.com",
         // Expires can also be set (although maxAge overrides it when used in combination).
         // Note that this method is NOT recommended as `new Date` creates only one date on each server deployment, not a dynamic date in the future!
         //
         // expires: new Date(Date.now() + 60_000),
         httpOnly: true,
-        maxAge: 60,
+        maxAge: 60 * 60 * 24 * 7,
         path: "/",
         sameSite: "lax",
         secrets: ["s3cret1"],

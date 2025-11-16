@@ -11,6 +11,8 @@ import { DeleteModal } from "../folderTree/modal/DeleteModal.jsx";
 import { FileFilter } from "../filter/FileFilter.jsx";
 import useFilter from "../../hooks/useFileFilter.js";
 import { useLocation } from "react-router";
+import { getFilePreview } from "../../helper/uiHelper.jsx";
+import { useFileDownload } from "../../hooks/useDownloadFile.js";
 const fileTypeMap = {
     "videos": "video",
     "audios": "audio",
@@ -25,11 +27,11 @@ export default function FileLibraryPage({ files, fileType = "raw", classMate = n
   const [description, setDescription] = useState("");
   const [name, setName] = useState("");
   const [classes, setClasses] = useState(classMate ? [Number(classMate)] : []);
-  const [downloading, setDownloading] = useState(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const { loading: updateLoading, error: updateError, data: updateData, updateFile, deleteFile } = useUpdateFile();
   const { upload, loading, error, data } = useUpload();
+  const { downloadFile, downloading } = useFileDownload();
   
   const initFilterGenerator = useMemo(() => {
   let temp = {
@@ -89,54 +91,6 @@ export default function FileLibraryPage({ files, fileType = "raw", classMate = n
     };
     if (category) dataUpload.category = category;
     upload(selectedFile, `/upload/${fileType}`, dataUpload);
-  };
-
-  const handleDownload = async (file) => {
-    setDownloading(file.id);
-    try {
-      const response = await fetch(file.downloadUrl || file.url);
-
-      if (!response.ok) {
-        throw new Error('Failed to download file');
-      }
-
-      const blob = await response.blob();
-      const finalFilename = file.filename;
-
-      const blobUrl = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.style.display = 'none';
-      a.href = blobUrl;
-      a.download = finalFilename;
-
-      document.body.appendChild(a);
-      a.click();
-
-      setTimeout(() => {
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(blobUrl);
-      }, 100);
-
-    } catch (error) {
-      console.error('Download error:', error);
-      alert('Không thể tải file. Vui lòng thử lại.');
-    } finally {
-      setDownloading(null);
-    }
-  };
-
-  const getFilePreview = (file) => {
-    const type = (file.type || "").toLowerCase();
-    switch (type) {
-      case "image":
-        return <img src={file.url} alt={file.filename} className={styles.imageCover} loading="lazy" />;
-      case "video":
-        return <video className={styles.thumbnail} src={file.url} muted />;
-      case "audio":
-        return <Music className={styles.fileIcon} />;
-      default:
-        return <FileText className={styles.fileIcon} />;
-    }
   };
 
   const handleModalClose = () => {
@@ -254,7 +208,7 @@ export default function FileLibraryPage({ files, fileType = "raw", classMate = n
                         className={styles.iconBtn}
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleDownload(file);
+                          downloadFile(file);
                         }}
                         disabled={downloading === file.id}
                         title="Tải xuống"
@@ -294,7 +248,7 @@ export default function FileLibraryPage({ files, fileType = "raw", classMate = n
                   )
                 }
                 <button
-                  onClick={() => handleDownload(clickedFile)}
+                  onClick={() => downloadFile(clickedFile)}
                   className={styles.viewBtn}
                 >
                   <Download size={18} />

@@ -1,4 +1,4 @@
-import { getSession } from "../sessions.sever";
+import { getSession } from "../sessions.server";
 
 export interface UserSession {
   id: string;

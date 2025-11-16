@@ -1,7 +1,33 @@
 .wrapper {
+  display: flex;
+  gap: 20px;
   padding: 24px;
   font-family: system-ui, sans-serif;
   color: #333;
+  height: calc(100vh - 48px);
+}
+
+/* Container bên trái - Danh sách */
+.leftPanel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* Container bên phải - Chi tiết */
+.rightPanel {
+  width: 400px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  padding: 20px;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+.rightPanel.hidden {
+  display: none;
 }
 
 .header {
@@ -25,6 +51,8 @@
   border-radius: 10px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   overflow: hidden;
+  flex: 1;
+  overflow-y: auto;
 }
 
 .table {
@@ -40,6 +68,9 @@
   color: #444;
   font-size: 15px;
   border-bottom: 1px solid #e5e5e5;
+  position: sticky;
+  top: 0;
+  z-index: 1;
 }
 
 .table td {
@@ -58,16 +89,8 @@
   background-color: #fafafa;
 }
 
-@media (max-width: 600px) {
-  .title {
-    font-size: 18px;
-  }
-
-  .table th,
-  .table td {
-    padding: 10px 12px;
-    font-size: 14px;
-  }
+.row.selected {
+  background-color: #e3f2fd;
 }
 
 .addBtn {
@@ -84,6 +107,95 @@
   background: #45a049;
 }
 
+/* Chi tiết lesson */
+.detailHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #e5e5e5;
+}
+
+.detailTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #666;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.closeBtn:hover {
+  background: #f0f0f0;
+}
+
+.detailSection {
+  margin-bottom: 20px;
+}
+
+.detailLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.detailValue {
+  font-size: 15px;
+  color: #333;
+  line-height: 1.6;
+}
+
+.emptyState {
+  text-align: center;
+  color: #999;
+  padding: 40px 20px;
+  font-size: 15px;
+}
+
+@media (max-width: 1024px) {
+  .wrapper {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .rightPanel {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .rightPanel.hidden {
+    display: block;
+  }
+}
+
+@media (max-width: 600px) {
+  .title {
+    font-size: 18px;
+  }
+
+  .table th,
+  .table td {
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+}
+
 .modalOverlay {
   position: fixed;
   top: 0;
@@ -94,6 +206,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 1000;
 }
 
 .modal {
@@ -111,7 +224,6 @@
   border-radius: 4px;
 }
 
-/* ⭐ Style cho label */
 .inputLabel {
   font-size: 14px;
   font-weight: 600;
@@ -120,7 +232,6 @@
   color: #333;
 }
 
-/* ⭐ Style cho dropdown chọn file từ API */
 .select {
   width: 100%;
   padding: 8px;
@@ -148,4 +259,406 @@
 
 .confirmBtn:hover {
   background: #1976d2;
+}
+/* Thêm vào cuối file CSS */
+
+.expandIcon {
+  display: inline-block;
+  margin-right: 8px;
+  transition: transform 0.2s ease;
+  font-size: 12px;
+  color: #666;
+}
+
+.expandIcon.expanded {
+  transform: rotate(90deg);
+}
+
+.lessonRow {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.lessonRow:hover {
+  background-color: #fafafa;
+}
+
+.lessonRow.selected {
+  background-color: #e3f2fd;
+}
+
+.lessonTitleCell {
+  display: flex;
+  align-items: center;
+}
+
+/* Cập nhật existing styles */
+.fileRow {
+  background-color: #f9f9f9;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.fileRow td:first-child {
+  padding-left: 48px;
+  color: #666;
+  font-size: 14px;
+}
+
+.fileRow:hover {
+  background-color: #f0f0f0;
+}
+
+.fileRow.selected {
+  background-color: #fff3cd;
+}
+
+.fileIcon {
+  margin-right: 6px;
+  font-size: 14px;
+}
+
+.noFiles {
+  color: #999;
+  font-style: italic;
+  font-size: 14px;
+}
+
+/* Detail panel enhancements */
+.detailType {
+  display: inline-block;
+  padding: 4px 10px;
+  background: #e3f2fd;
+  color: #1976d2;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.detailType.fileType {
+  background: #fff3cd;
+  color: #f57c00;
+}
+
+.detailActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.actionBtn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.downloadBtn {
+  background: #4caf50;
+  color: white;
+}
+
+.downloadBtn:hover {
+  background: #45a049;
+}
+
+.viewBtn {
+  background: #2196f3;
+  color: white;
+}
+
+.viewBtn:hover {
+  background: #1976d2;
+}
+
+/* Giữ nguyên các styles trước, thêm/cập nhật các styles sau */
+
+.fileMetadata {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.metadataItem {
+  padding: 12px;
+  background: #f9f9f9;
+  border-radius: 6px;
+}
+
+.metadataGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.metadataLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.metadataValue {
+  font-size: 14px;
+  color: #333;
+  font-weight: 600;
+}
+
+.filePreview {
+  margin-top: 16px;
+  padding: 12px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.filePreview img,
+.filePreview video {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: 6px;
+  margin-top: 8px;
+}
+
+.filePreview audio {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.mimeType {
+  display: inline-block;
+  padding: 4px 8px;
+  background: #e8f5e9;
+  color: #2e7d32;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: monospace;
+}
+/* Action buttons cho lesson */
+.lessonActions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.actionIcon {
+  padding: 6px 8px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.2s ease;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.editIcon {
+  color: #2196f3;
+}
+
+.editIcon:hover {
+  background: #e3f2fd;
+}
+
+/* Action menu trong detail panel */
+.detailActionsMenu {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e5e5e5;
+}
+
+.detailActionButton {
+  padding: 12px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+}
+
+.editDetailButton {
+  background: #2196f3;
+  color: white;
+}
+
+.editDetailButton:hover {
+  background: #1976d2;
+}
+
+/* Hover effect cho lesson row khi có actions */
+.lessonRow .lessonActions {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.lessonRow:hover .lessonActions {
+  opacity: 1;
+}
+
+/* Thêm style để action cell không trigger row click */
+.actionCell {
+  width: 60px;
+}
+/* Update action buttons */
+.lessonActions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.actionIcon {
+  padding: 6px 8px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.2s ease;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.editIcon {
+  color: #2196f3;
+}
+
+.editIcon:hover {
+  background: #e3f2fd;
+}
+
+.deleteIcon {
+  color: #f44336;
+}
+
+.deleteIcon:hover {
+  background: #ffebee;
+}
+
+/* Delete confirmation modal */
+.deleteModal {
+  background: white;
+  padding: 24px;
+  border-radius: 10px;
+  width: 450px;
+  max-width: 90%;
+}
+
+.deleteModalHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.deleteModalIcon {
+  font-size: 32px;
+  color: #f44336;
+}
+
+.deleteModalTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.deleteModalMessage {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
+  line-height: 1.6;
+}
+
+.deleteModalWarning {
+  font-size: 13px;
+  color: #f44336;
+  background: #ffebee;
+  padding: 12px;
+  border-radius: 6px;
+  margin: 16px 0;
+  font-weight: 500;
+}
+
+.deleteModalLessonName {
+  font-weight: 600;
+  color: #1a1a1a;
+  padding: 8px 12px;
+  background: #f5f5f5;
+  border-radius: 4px;
+  margin: 12px 0;
+  font-size: 14px;
+}
+
+.deleteModalActions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.cancelButton {
+  padding: 10px 20px;
+  background: #e0e0e0;
+  color: #333;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background 0.2s ease;
+}
+
+.cancelButton:hover {
+  background: #d0d0d0;
+}
+
+.confirmDeleteButton {
+  padding: 10px 20px;
+  background: #f44336;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background 0.2s ease;
+}
+
+.confirmDeleteButton:hover {
+  background: #d32f2f;
+}
+
+.confirmDeleteButton:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+/* Delete button trong detail panel */
+.deleteDetailButton {
+  background: #f44336;
+  color: white;
+}
+
+.deleteDetailButton:hover {
+  background: #d32f2f;
 }

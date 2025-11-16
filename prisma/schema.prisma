@@ -1,8 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// prisma/schema.prisma
 
 generator client {
   provider = "prisma-client"
@@ -13,13 +9,21 @@ datasource db {
   provider = "mongodb"
   url      = "mongodb+srv://seven007:seven007@poaap.f0mxo.mongodb.net/music_collection?retryWrites=true&w=majority"
 }
+
 model User {
-  id        String  @id @default(auto()) @map("_id") @db.ObjectId
-  email     String   @unique
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  email     String    @unique
   name      String
-  role      Role     @default(STUDENT)
+  role      Role      @default(STUDENT)
   password  String
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt // ✅ Thêm ? để optional
+
+  files      File[]     @relation("FileOwner")
+  categories Category[] @relation("CategoryOwner")
+  lessons    Lesson[]   @relation("LessonOwner")
+
+  @@index([role])
 }
 
 enum Role {
@@ -28,42 +32,70 @@ enum Role {
   STUDENT
   CONTRIBUTOR
 }
+
 model File {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  filename   String
-  publicId   String?
-  url        String
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  filename    String
+  publicId    String?
+  url         String
   downloadUrl String?
-  type       String
-  size       Int
-  src        String?
-  detail     Json?
-  name       String?
+  type        String
+  size        Int
+  src         String?
+  detail      Json?
+  name        String?
   description String?
-  category   String?  @db.ObjectId
-  classes    Int[] @default([])
-  ownerId    String?  @db.ObjectId
-  ownerName    String?
-  createdAt  DateTime @default(now())
+  
+  categoryId  String?   @db.ObjectId
+  category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  
+  classes     Int[]     @default([])
+  
+  ownerId     String?   @db.ObjectId
+  owner       User?     @relation("FileOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  ownerName   String?
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime? @updatedAt // ✅ Thêm ?
+
+  @@index([categoryId])
+  @@index([ownerId])
+  @@index([type])
+  @@index([createdAt])
 }
 
 model Category {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
   name        String
   slug        String    @unique
   description String?
-  ownerId    String?  @db.ObjectId
+  
+  ownerId     String?   @db.ObjectId
+  owner       User?     @relation("CategoryOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  files       File[]
+  
   createdAt   DateTime  @default(now())
+  updatedAt   DateTime? @updatedAt // ✅ Thêm ?
+
+  @@index([ownerId])
 }
 
 model Lesson {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  title      String
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
   description String?
-  creator    String
-  ownerId    String?  @db.ObjectId
-  ownerName    String?
-  fileIds      String[] @db.ObjectId @default([])
-  classId    String?  @db.ObjectId
+  
+  ownerId     String    @db.ObjectId
+  owner       User      @relation("LessonOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerName   String
+  
+  fileIds     String[]  @db.ObjectId @default([])
+  
+  classId     Int?
+  
   createdAt   DateTime  @default(now())
+  updatedAt   DateTime? @updatedAt // ✅ Thêm ?
+
+  @@index([ownerId])
+  @@index([createdAt])
 }

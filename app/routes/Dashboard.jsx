@@ -6,11 +6,16 @@ import { getUser } from "../service/auth.server";
 import { menuData } from "../utils/menuData";
 import { CategoryModel } from "../.server/category.repo";
 import { CategoryProvider } from "../context/CategoryContext";
+import toast, { Toaster } from 'react-hot-toast';
+import { commitSession, getSession } from "../sessions.server";
+import { useEffect } from "react";
 
 export async function loader({ request }) {
   const user = await getUser(request);
   const categoryModel = new CategoryModel();
   const customCategories = await categoryModel.findAll();
+  const session = await getSession(request.headers.get("Cookie"));
+  let message = session.get("message");
   if (!user) throw redirect("/login");
   const menuList = [
     ...menuData,
@@ -37,15 +42,51 @@ export async function loader({ request }) {
       ]
     }
   ];
-  return { user, menuList, customCategories };
+  return Response.json({ user, message, menuList, customCategories}, {
+    headers: {
+      "Set-Cookie": await commitSession(session),
+    }
+  });
 }
 
 
 export default function Dashboard({ loaderData }) {
-  const { user, menuList, customCategories } = loaderData;
-
+  const { user, menuList, customCategories, message = '' } = loaderData;
+  useEffect(() => {
+    if (message && message !== '') {
+      toast(message);
+    }
+  }, [message]);
   return (
     <CategoryProvider customCategories={customCategories}>
+      <Toaster
+        position="top-right"
+        reverseOrder={false}
+        toastOptions={{
+          duration: 3000,
+          style: {
+            background: '#363636',
+            color: '#fff',
+            fontSize: '14px',
+            padding: '16px',
+            borderRadius: '8px',
+          },
+          success: {
+            duration: 3000,
+            iconTheme: {
+              primary: '#4caf50',
+              secondary: '#fff',
+            },
+          },
+          error: {
+            duration: 4000,
+            iconTheme: {
+              primary: '#f44336',
+              secondary: '#fff',
+            },
+          },
+        }}
+      />
       <div className={styles.dashboard}>
         <Header user={user} />
 

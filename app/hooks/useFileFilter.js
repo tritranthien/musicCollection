@@ -36,7 +36,6 @@ export default function useFilter(
   });
 
   const isLoading = fetcher.state !== "idle";
-  console.log(initialFilters, "-----" ,activeFilters);
   
   // ⚡ Khi initialData thay đổi (VD: điều hướng Remix)
   useEffect(() => {
@@ -56,7 +55,6 @@ export default function useFilter(
   const filter = (filters, resetPage = true) => {
     if (!endpoint) return console.warn("No endpoint provided for filter");
     const newFilters = { ...activeFilters, ...filters };
-    console.log(newFilters, initialFilters);
     
     if (deepEqual(newFilters, initialFilters)) {
       setData(initialData);

@@ -8,6 +8,7 @@ export default [
         route(`tuy-chinh/:category`, "routes/category.jsx"),
         route(`tim-kiem`, "routes/search.jsx"),
         route(`chuong-trinh-hoc/bai-giang/create/:classId?`, "routes/dashboard/createLesson.jsx"),
+        route(`chuong-trinh-hoc/bai-giang/edit/:lessonId`, "routes/dashboard/editLesson.jsx"),
     ]),
     layout("layouts/authen/Authen.jsx", [
         route("login", "routes/Login.jsx"),
@@ -19,4 +20,5 @@ export default [
     route("deleteFile", "routes/actions/deleteFile.jsx"),
     route("api/category", "routes/actions/category.jsx"),
     route("api/filterFile", "routes/actions/filterFile.jsx"),
+    route("api/lesson", "routes/actions/lesson.jsx"),
 ] satisfies RouteConfig;

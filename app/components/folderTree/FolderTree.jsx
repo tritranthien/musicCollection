@@ -60,8 +60,6 @@ const TreeItem = ({ item, level = 0, onCategoryAdd, currentPath = '', user = nul
   };
   const handleEditSubmit = (name) => {
     if (name.trim()) {
-      console.log(item, name);
-      
       const formData = new FormData();
       formData.append("intent", "update");
       formData.append("id", item.id);

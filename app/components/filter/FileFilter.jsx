@@ -127,7 +127,6 @@ export const FileFilter = ({ onFilterChange, initialFilters = {}, disabledFilter
     const mb = bytes / (1024 * 1024);
     return mb.toFixed(2);
   };
-  console.log(filters, 'filters');
   
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">

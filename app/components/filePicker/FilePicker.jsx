@@ -1,10 +1,11 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useMemo, useState } from "react";
-import { Check, X, FileText, Music } from "lucide-react";
+import { Check, X } from "lucide-react";
+import { useMemo, useState } from "react";
 import styles from "../../globals/styles/ImageGallery.module.css";
-import pickerStyles from "./FilePicker.module.css";
 import useFilter from "../../hooks/useFileFilter";
 import { FileFilter } from "../filter/FileFilter";
+import pickerStyles from "./FilePicker.module.css";
+import { getFilePreview } from "../../helper/uiHelper";
 
 // Fake file data
 const fakeFiles = [
@@ -71,72 +72,52 @@ export default function FilePicker({ selectedFiles, onSelectFiles, multiple = fa
     filter(filters);
   };
 
-  const getFilePreview = (file) => {
-    const type = (file.type || "").toLowerCase();
-    switch (type) {
-      case "image":
-        return <img src={file.url} alt={file.name} className={styles.imageCover} loading="lazy" />;
-      case "video":
-        return <video className={styles.thumbnail} src={file.url} muted />;
-      case "audio":
-        return <Music className={styles.fileIcon} />;
-      default:
-        return <FileText className={styles.fileIcon} />;
-    }
-  };
-
   const handleItemClick = (file) => {
     if (multiple) {
-      if (selectedFiles.includes(file.id)) {
-        onSelectFiles(selectedFiles.filter(f => f !== file.id));
+      let isSelected = selectedFiles.some(f => f.id === file.id);
+      if (isSelected) {
+        onSelectFiles(selectedFiles.filter(f => f.id !== file.id));
       } else {
-        onSelectFiles([...selectedFiles, file.id]);
+        onSelectFiles([...selectedFiles, file]);
       }
     } else {
-      onSelectFiles([file.id]);
+      onSelectFiles([file]);
     }
   };
 
   return (
-    <>
-      {/* INPUT + BUTTON MỞ MODAL */}
-      <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-        <input
-          type="text"
-          readOnly
-          value={selectedFiles.map(f => {
-            const file = fakeFiles.find(file => file.id === f);
-            return file ? file.name : "";
-          }).join(", ")}
-          placeholder="Chọn file..."
-          style={{ flex: 1, padding: 6, border: "1px solid #ccc", borderRadius: 4, cursor: "pointer" }}
-          onClick={() => setIsModalOpen(true)}
-        />
-        <button
-          style={{ padding: "6px 12px", background: "#4caf50", color: "#fff", borderRadius: 4, border: "none", cursor: "pointer" }}
-          onClick={() => setIsModalOpen(true)}
-        >
-          Chọn
-        </button>
-      </div>
+  <>
+    {/* CHỈ BUTTON */}
+    <div className={pickerStyles.filePickerWrapper}>
+      <button
+        className={pickerStyles.openBtn}
+        onClick={() => setIsModalOpen(true)}
+      >
+        📁 Chọn file {selectedFiles.length > 0 && `(${selectedFiles.length})`}
+      </button>
+    </div>
 
-      {/* MODAL */}
-      <AnimatePresence>
-        {isModalOpen && (
+    {/* MODAL */}
+    <AnimatePresence>
+      {isModalOpen && (
+        <motion.div
+          className={pickerStyles.modalOverlay}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
           <motion.div
-            className={pickerStyles.modalOverlay}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            className={pickerStyles.modal}
+            initial={{ y: 50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 50, opacity: 0 }}
           >
-            <motion.div
-              className={pickerStyles.modal}
-              initial={{ y: 50, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 50, opacity: 0 }}
-            >
-              {/* FILTER */}
-              <div className={pickerStyles.headerActions}>
+            {/* HEADER FIXED */}
+            <div className={pickerStyles.headerActions}>
+              <h3 className={pickerStyles.modalTitle}>
+                Chọn file {selectedFiles.length > 0 && `(${selectedFiles.length} đã chọn)`}
+              </h3>
+              <div className={pickerStyles.actionButtons}>
                 <button className={pickerStyles.cancelBtn} onClick={() => setIsModalOpen(false)}>
                   <X size={16} /> Hủy
                 </button>
@@ -144,6 +125,10 @@ export default function FilePicker({ selectedFiles, onSelectFiles, multiple = fa
                   <Check size={16} /> Chọn
                 </button>
               </div>
+            </div>
+
+            {/* CONTENT CÓ THỂ SCROLL */}
+            <div className={pickerStyles.modalContent}>
               <div className={styles.filterContainer}>
                 <FileFilter
                   onFilterChange={handleFilterChange}
@@ -152,7 +137,6 @@ export default function FilePicker({ selectedFiles, onSelectFiles, multiple = fa
                 />
               </div>
 
-              {/* LEFT PANE - GRID FILE */}
               <div className={styles.container}>
                 <div className={styles.leftPane}>
                   {filterResult.length === 0 ? (
@@ -162,7 +146,7 @@ export default function FilePicker({ selectedFiles, onSelectFiles, multiple = fa
                       {filterResult.map(file => (
                         <motion.div
                           key={file.id}
-                          className={`${styles.card} ${selectedFiles.includes(file.id) ? styles.activeCard : ""}`}
+                          className={`${styles.card} ${selectedFiles.some(f => f.id === file.id) ? styles.activeCard : ""}`}
                           whileHover={{ scale: 1.02 }}
                           transition={{ duration: 0.2 }}
                           onClick={() => handleItemClick(file)}
@@ -176,11 +160,12 @@ export default function FilePicker({ selectedFiles, onSelectFiles, multiple = fa
                     </div>
                   )}
                 </div>
-              </div>              
-            </motion.div>
+              </div>
+            </div>
           </motion.div>
-        )}
-      </AnimatePresence>
-    </>
-  );
+        </motion.div>
+      )}
+    </AnimatePresence>
+  </>
+);
 }
