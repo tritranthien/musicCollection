@@ -30,13 +30,32 @@ export async function loader({ request }) {
         { icon: '🖼️', label: 'Hình ảnh', path: `/bang-dieu-khien/suu-tap/hinh-anh`, edit: false },
         { icon: '🎧', label: 'Âm thanh', path: `/bang-dieu-khien/suu-tap/am-thanh`, edit: false },
         { icon: '📄', label: 'Tài liệu', path: `/bang-dieu-khien/suu-tap/tai-lieu`, edit: false },
-        ...customCategories.map((category) => ({
+        ...customCategories.filter((category) => category.rootPath === '/suu-tap').map((category) => ({
           id: category.id,
           slug: category.slug,
           ownerId: category.ownerId,
           icon: '🗃️',
           label: category.name,
           path: `/bang-dieu-khien/tuy-chinh/${category.slug}`,
+          edit: true,
+        }))
+      ]
+    },
+    {
+      label: 'Thông tin sưu tầm',
+      path: '/thong-tin-suu-tam',
+      icon: '📄',
+      custom: true,
+      edit: false,
+      nonLink: true,
+      children: [
+        ...customCategories.filter((category) => category.rootPath === '/thong-tin-suu-tam').map((category) => ({
+          id: category.id,
+          slug: category.slug,
+          ownerId: category.ownerId,
+          icon: '🗃️',
+          label: category.name,
+          path: `/bang-dieu-khien/thong-tin-suu-tam/${category.slug}`,
           edit: true,
         }))
       ]

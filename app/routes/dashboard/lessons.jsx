@@ -1,7 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styles from "../../globals/styles/lessonList.module.css";
 import { useNavigate } from "react-router";
 import { LessonModel } from "../../.server/lesson.repo";
+import { useFetcherWithReset } from "../../hooks/useFetcherWithReset";
+import { useFileDownload } from "../../hooks/useDownloadFile";
+import toast from "react-hot-toast";
+import JSZip from "jszip";
 
 export async function loader({ params }) {
   const { classId } = params;
@@ -13,12 +17,14 @@ export async function loader({ params }) {
 export default function LessonList({ loaderData }) {
   const { classId, lessons } = loaderData;
   const navigate = useNavigate();
+  const fetcher = useFetcherWithReset();
+  const { downloadFile, downloading } = useFileDownload();
   const [selectedItem, setSelectedItem] = useState(null);
   const [selectedType, setSelectedType] = useState(null);
   const [expandedLessons, setExpandedLessons] = useState(new Set());
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [lessonToDelete, setLessonToDelete] = useState(null);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [downloadingLesson, setDownloadingLesson] = useState(null);
 
   const handleLessonClick = (lesson) => {
     setSelectedItem(lesson);
@@ -88,14 +94,10 @@ export default function LessonList({ loaderData }) {
     return icons[type] || '📄';
   };
 
+  // Sử dụng hook downloadFile cho single file
   const handleDownloadFile = () => {
-    if (selectedItem && selectedItem.url) {
-      const link = document.createElement('a');
-      link.href = selectedItem.url;
-      link.download = selectedItem.name || selectedItem.filename || 'download';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+    if (selectedItem && (selectedItem.url || selectedItem.downloadUrl)) {
+      downloadFile(selectedItem);
     }
   };
 
@@ -122,8 +124,136 @@ export default function LessonList({ loaderData }) {
   };
 
   const handleConfirmDelete = async () => {
-   
+    if (!lessonToDelete) {
+      return;
+    }
+    const formData = new FormData();
+    formData.append('lessonId', lessonToDelete.id);
+    formData.append('intent', 'delete');
+    fetcher.submit(formData, {
+      action: '/api/lesson',
+      method: 'post',
+    });
   };
+
+  // Download toàn bộ files của lesson thành ZIP
+  const handleDownloadLessonFiles = async (e, lesson) => {
+    e.stopPropagation();
+    
+    if (!lesson.files || lesson.files.length === 0) {
+      toast.error('Bài giảng này không có file nào để tải');
+      return;
+    }
+
+    setDownloadingLesson(lesson.id);
+    const toastId = toast.loading('Đang chuẩn bị tải xuống...');
+
+    try {
+      const zip = new JSZip();
+      let successCount = 0;
+      let failCount = 0;
+      
+      // Download tất cả files
+      const downloadPromises = lesson.files.map(async (file, index) => {
+        try {
+          const url = file.downloadUrl || file.url;
+          const response = await fetch(url);
+          
+          if (!response.ok) {
+            throw new Error(`Failed to fetch ${file.name}`);
+          }
+          
+          // Lấy blob với proper content type
+          const blob = await response.blob();
+          
+          // Ưu tiên sử dụng filename (đã có extension) từ file object
+          // Nếu không có thì fallback sang name, sau đó là tạo tên mặc định
+          let finalFilename = file.filename || file.name;
+          
+          // Nếu không có filename hợp lệ, tạo tên mặc định dựa trên MIME type
+          if (!finalFilename) {
+            const extension = blob.type ? blob.type.split('/')[1] : 'bin';
+            finalFilename = `file_${index + 1}.${extension}`;
+          }
+          
+          // Handle duplicate filenames bằng cách thêm số thứ tự
+          let uniqueFilename = finalFilename;
+          let counter = 1;
+          while (zip.file(uniqueFilename)) {
+            const parts = finalFilename.split('.');
+            if (parts.length > 1) {
+              const ext = parts.pop();
+              const nameWithoutExt = parts.join('.');
+              uniqueFilename = `${nameWithoutExt}_${counter}.${ext}`;
+            } else {
+              uniqueFilename = `${finalFilename}_${counter}`;
+            }
+            counter++;
+          }
+          
+          // Thêm file vào zip với filename đã có extension
+          zip.file(uniqueFilename, blob);
+          successCount++;
+          
+          return true;
+        } catch (error) {
+          console.error(`Error downloading ${file.name || file.filename}:`, error);
+          failCount++;
+          return false;
+        }
+      });
+
+      await Promise.all(downloadPromises);
+
+      if (successCount === 0) {
+        throw new Error('Không thể tải xuống bất kỳ file nào');
+      }
+
+      // Tạo ZIP file
+      toast.loading(`Đang nén ${successCount} files...`, { id: toastId });
+      const zipBlob = await zip.generateAsync({ 
+        type: 'blob',
+        compression: "DEFLATE",
+        compressionOptions: { level: 6 }
+      });
+
+      // Download ZIP với cùng pattern như hook useFileDownload
+      const blobUrl = window.URL.createObjectURL(zipBlob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = blobUrl;
+      a.download = `${lesson.title.replace(/[^a-z0-9]/gi, '_')}_files.zip`;
+      
+      document.body.appendChild(a);
+      a.click();
+
+      // Cleanup giống như hook useFileDownload
+      setTimeout(() => {
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(blobUrl);
+      }, 100);
+
+      const message = failCount > 0 
+        ? `Đã tải xuống ${successCount}/${lesson.files.length} files`
+        : `Đã tải xuống ${successCount} files`;
+      
+      toast.success(message, { id: toastId });
+    } catch (error) {
+      console.error('Error creating ZIP:', error);
+      toast.error('Có lỗi xảy ra khi tải xuống', { id: toastId });
+    } finally {
+      setDownloadingLesson(null);
+    }
+  };
+
+  useEffect(() => {
+    if (fetcher.data) {
+      setShowDeleteModal(false);
+      setLessonToDelete(null);
+      toast.success('Đã xoá bài giảng');
+      fetcher.reset();
+    }
+  }, [fetcher.data]);
 
   return (
     <div className={styles.wrapper}>
@@ -135,7 +265,7 @@ export default function LessonList({ loaderData }) {
             className={styles.addBtn} 
             onClick={() => navigate(`/bang-dieu-khien/chuong-trinh-hoc/bai-giang/create/${classId}`)}
           >
-            ➕ Add New Lesson
+            ➕ Thêm bài giảng
           </button>
         </div>
         
@@ -171,6 +301,14 @@ export default function LessonList({ loaderData }) {
                       <td>{lesson.owner.name}</td>
                       <td className={styles.actionCell}>
                         <div className={styles.lessonActions}>
+                          <button 
+                            className={`${styles.actionIcon} ${styles.downloadIcon}`}
+                            onClick={(e) => handleDownloadLessonFiles(e, lesson)}
+                            title="Tải xuống tất cả files"
+                            disabled={downloadingLesson === lesson.id || !lesson.files || lesson.files.length === 0}
+                          >
+                            {downloadingLesson === lesson.id ? '⏳' : '📦'}
+                          </button>
                           <button 
                             className={`${styles.actionIcon} ${styles.editIcon}`}
                             onClick={(e) => handleEditLesson(e, lesson.id)}
@@ -288,6 +426,13 @@ export default function LessonList({ loaderData }) {
 
                 {/* Action buttons trong detail panel */}
                 <div className={styles.detailActionsMenu}>
+                  <button 
+                    className={`${styles.detailActionButton} ${styles.downloadDetailButton}`}
+                    onClick={(e) => handleDownloadLessonFiles(e, selectedItem)}
+                    disabled={downloadingLesson === selectedItem.id || !selectedItem.files || selectedItem.files.length === 0}
+                  >
+                    {downloadingLesson === selectedItem.id ? '⏳ Đang tải...' : '📦 Tải xuống tất cả files (ZIP)'}
+                  </button>
                   <button 
                     className={`${styles.detailActionButton} ${styles.editDetailButton}`}
                     onClick={() => navigate(`/bang-dieu-khien/chuong-trinh-hoc/bai-giang/edit/${selectedItem.id}`)}
@@ -421,9 +566,10 @@ export default function LessonList({ loaderData }) {
                     <button 
                       className={`${styles.actionBtn} ${styles.downloadBtn}`} 
                       onClick={handleDownloadFile}
+                      disabled={downloading === selectedItem.id}
                       style={!isMediaFile(selectedItem.type) ? { flex: 1 } : {}}
                     >
-                      ⬇️ Tải xuống
+                      {downloading === selectedItem.id ? '⏳ Đang tải...' : '⬇️ Tải xuống'}
                     </button>
                   </div>
                 )}
@@ -462,16 +608,16 @@ export default function LessonList({ loaderData }) {
               <button 
                 className={styles.cancelButton}
                 onClick={handleCancelDelete}
-                disabled={isDeleting}
+                disabled={fetcher.state === 'submitting'}
               >
                 Hủy
               </button>
               <button 
                 className={styles.confirmDeleteButton}
                 onClick={handleConfirmDelete}
-                disabled={isDeleting}
+                disabled={fetcher.state === 'submitting'}
               >
-                {isDeleting ? 'Đang xóa...' : 'Xác nhận xóa'}
+                {fetcher.state === 'submitting' ? 'Đang xóa...' : 'Xác nhận xóa'}
               </button>
             </div>
           </div>

@@ -17,6 +17,7 @@ export async function action({ request }) {
       case "create": {
         const name = formData.get("name");
         const description = formData.get("description");
+        const rootPath = formData.get("rootPath");
 
         if (!name || name.trim().length === 0) {
           return Response.json(
@@ -29,6 +30,7 @@ export async function action({ request }) {
           name: name.trim(),
           description: description?.trim() || null,
           ownerId: user.id,
+          rootPath: rootPath?.trim() || null,
         });
 
         return Response.json({ success: true, category }, { status: 201 });
@@ -38,6 +40,7 @@ export async function action({ request }) {
         const id = formData.get("id");
         const name = formData.get("name");
         const description = formData.get("description");
+        const rootPath = formData.get("rootPath");
 
         if (!id) {
           return Response.json({ error: "Category ID is required" }, { status: 400 });
@@ -52,6 +55,7 @@ export async function action({ request }) {
         const category = await categoryModel.updateCategory(id, {
           name: name?.trim(),
           description: description?.trim(),
+          rootPath: rootPath?.trim() || null,
         });
 
         return Response.json({ success: true, category });

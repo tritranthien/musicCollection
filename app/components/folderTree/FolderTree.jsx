@@ -46,11 +46,12 @@ const TreeItem = ({ item, level = 0, onCategoryAdd, currentPath = '', user = nul
     e.stopPropagation();
     setIsDeleteModalOpen(true);
   };
-  const handleCategorySubmit = (name) => {
+  const handleCategorySubmit = (name, rootPath) => {
     if (name.trim()) {
       const formData = new FormData();
       formData.append("intent", "create");
       formData.append("name", name.trim());
+      formData.append("rootPath", rootPath.trim());
 
       fetcher.submit(formData, {
         method: "post",
@@ -185,11 +186,10 @@ const TreeItem = ({ item, level = 0, onCategoryAdd, currentPath = '', user = nul
       </div>
     </div>
   );
-
   return (
     <>
       <div>
-        {hasChildren ? (
+        {(hasChildren || item.nonLink) ? (
           <div onClick={toggleOpen} className={styles.clickable}>
             <ItemContent />
           </div>
@@ -219,7 +219,7 @@ const TreeItem = ({ item, level = 0, onCategoryAdd, currentPath = '', user = nul
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         parentLabel={item.label}
-        onSubmit={handleCategorySubmit}
+        onSubmit={(name)=>handleCategorySubmit(name,item.path)}
       />
       <EditCategoryModal
         isOpen={isEditModalOpen}

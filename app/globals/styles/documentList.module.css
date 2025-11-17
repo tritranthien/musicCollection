@@ -1,0 +1,598 @@
+/* Layout chính */
+.wrapper {
+  display: flex;
+  height: 100vh;
+  background-color: #f5f7fa;
+  overflow: hidden;
+}
+
+/* Panel bên trái */
+.leftPanel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: white;
+  border-right: 1px solid #e5e7eb;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 32px;
+  border-bottom: 1px solid #e5e7eb;
+  background-color: white;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
+
+.addBtn {
+  padding: 10px 20px;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.addBtn:hover {
+  background-color: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3);
+}
+
+/* Table */
+.tableContainer {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 32px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table thead tr {
+  background-color: #f9fafb;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.table thead th {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.table tbody tr {
+  border-bottom: 1px solid #f3f4f6;
+  transition: background-color 0.15s;
+}
+
+.documentRow {
+  cursor: pointer;
+}
+
+.documentRow:hover {
+  background-color: #f9fafb;
+}
+
+.documentRow.selected {
+  background-color: #eff6ff;
+  border-left: 3px solid #3b82f6;
+}
+
+.table tbody td {
+  padding: 16px;
+  font-size: 14px;
+  color: #374151;
+}
+
+.documentTypeIcon {
+  font-size: 20px;
+  display: inline-block;
+}
+
+.documentTitle {
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.subtitle {
+  font-weight: 400;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+/* Action buttons trong table */
+.actionCell {
+  width: 100px;
+  text-align: right;
+}
+
+.documentActions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.documentRow:hover .documentActions {
+  opacity: 1;
+}
+
+.actionIcon {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 6px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.actionIcon:hover {
+  background-color: #f3f4f6;
+  transform: scale(1.1);
+}
+
+.editIcon:hover {
+  background-color: #dbeafe;
+}
+
+.deleteIcon:hover {
+  background-color: #fee2e2;
+}
+
+.actionIcon:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Empty state */
+.emptyList {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+  color: #9ca3af;
+}
+
+.emptyList p {
+  font-size: 18px;
+  margin-bottom: 20px;
+}
+
+.addBtnLarge {
+  padding: 12px 24px;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 16px;
+}
+
+.addBtnLarge:hover {
+  background-color: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+/* Panel bên phải - Chi tiết */
+.rightPanel {
+  width: 420px;
+  background-color: white;
+  border-left: 1px solid #e5e7eb;
+  overflow-y: auto;
+  transition: transform 0.3s ease;
+}
+
+.rightPanel.hidden {
+  transform: translateX(100%);
+}
+
+.detailHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 24px;
+  border-bottom: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+}
+
+.detailType {
+  display: inline-block;
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+
+.detailTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
+
+.closeBtn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  font-size: 24px;
+  cursor: pointer;
+  color: #6b7280;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.closeBtn:hover {
+  background-color: #f3f4f6;
+  color: #1f2937;
+}
+
+.detailSection {
+  padding: 20px 24px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.detailLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+
+.detailValue {
+  font-size: 14px;
+  color: #1f2937;
+  line-height: 1.6;
+  word-break: break-word;
+}
+
+/* Tags */
+.tagContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag {
+  display: inline-block;
+  padding: 4px 12px;
+  background-color: #eff6ff;
+  color: #1e40af;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Metadata grid */
+.metadataGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  padding: 20px 24px;
+  background-color: #f9fafb;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.metadataItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.metadataLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.metadataValue {
+  font-size: 13px;
+  color: #1f2937;
+  font-weight: 500;
+}
+
+/* Content preview */
+.contentPreview {
+  padding: 20px 24px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.contentPreviewBox {
+  margin-top: 12px;
+  padding: 16px;
+  background-color: #f9fafb;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #4b5563;
+  line-height: 1.6;
+  max-height: 200px;
+  overflow: hidden;
+  position: relative;
+}
+
+.contentPreviewBox::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: linear-gradient(transparent, #f9fafb);
+}
+
+/* Action buttons trong detail panel */
+.detailActionsMenu {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px;
+}
+
+.detailActionButton {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+}
+
+.viewDetailButton {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.viewDetailButton:hover {
+  background-color: #2563eb;
+  transform: translateX(4px);
+}
+
+.editDetailButton {
+  background-color: #eff6ff;
+  color: #1e40af;
+}
+
+.editDetailButton:hover {
+  background-color: #dbeafe;
+  transform: translateX(4px);
+}
+
+.deleteDetailButton {
+  background-color: #fef2f2;
+  color: #b91c1c;
+}
+
+.deleteDetailButton:hover {
+  background-color: #fee2e2;
+  transform: translateX(4px);
+}
+
+.detailActionButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Empty state trong detail panel */
+.emptyState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #9ca3af;
+  font-size: 16px;
+  text-align: center;
+  padding: 40px;
+}
+
+/* Delete Modal */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.deleteModal {
+  background-color: white;
+  border-radius: 12px;
+  padding: 32px;
+  max-width: 480px;
+  width: 90%;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.deleteModalHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.deleteModalIcon {
+  font-size: 32px;
+}
+
+.deleteModalTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
+
+.deleteModalMessage {
+  font-size: 15px;
+  color: #4b5563;
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+.deleteModalDocumentInfo {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background-color: #f9fafb;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border-left: 3px solid #3b82f6;
+}
+
+.deleteModalDocumentInfo .deleteModalIcon {
+  font-size: 32px;
+}
+
+.deleteModalDocumentTitle {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 15px;
+  margin-bottom: 4px;
+}
+
+.deleteModalDocumentType {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.deleteModalWarning {
+  padding: 12px 16px;
+  background-color: #fef2f2;
+  border-left: 3px solid #ef4444;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #991b1b;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.deleteModalActions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.cancelButton,
+.confirmDeleteButton {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cancelButton {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.cancelButton:hover {
+  background-color: #e5e7eb;
+}
+
+.confirmDeleteButton {
+  background-color: #ef4444;
+  color: white;
+}
+
+.confirmDeleteButton:hover {
+  background-color: #dc2626;
+}
+
+.cancelButton:disabled,
+.confirmDeleteButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .rightPanel {
+    width: 360px;
+  }
+}
+
+@media (max-width: 768px) {
+  .wrapper {
+    flex-direction: column;
+  }
+
+  .rightPanel {
+    width: 100%;
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100vh;
+    z-index: 100;
+  }
+
+  .rightPanel.hidden {
+    transform: translateX(100%);
+  }
+
+  .metadataGrid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -11,10 +11,11 @@ export async function loader({ params }) {
   const cate = await categoryModel.findBySlug(category);
   const query = { category: cate.id };
   const files = await fileModel.findWithFilters(query);
-  return Response.json({ files, fileType, category: cate.id });
+  return Response.json({ files, fileType, category: cate.id, cateName: cate.name });
 }
 
 export default function FileLibraryPage() {
-  const { files, fileType, category } = useLoaderData();
-  return <FileLibraryLayout files={files} fileType={fileType} category={category} />;
+  const { files, fileType, category, cateName } = useLoaderData();
+  let pageName = `📁 ${cateName}`;
+  return <FileLibraryLayout files={files} fileType={fileType} category={category} pageName={pageName} />;
 }

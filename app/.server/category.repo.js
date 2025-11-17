@@ -33,7 +33,7 @@ export class CategoryModel extends BaseModel {
   }
 
   // Tạo category mới
-  async createCategory({ name, description, ownerId }) {
+  async createCategory({ name, description, ownerId, rootPath }) {
     const slug = generateSlug(name);
 
     // Kiểm tra slug đã tồn tại chưa
@@ -56,6 +56,7 @@ export class CategoryModel extends BaseModel {
           slug: `${slug}-${count + 1}`,
           description,
           ownerId,
+          rootPath
         },
       });
     }
@@ -66,12 +67,13 @@ export class CategoryModel extends BaseModel {
         slug,
         description,
         ownerId,
+        rootPath
       },
     });
   }
 
   // Cập nhật category
-  async updateCategory(id, { name, description }) {
+  async updateCategory(id, { name, description, rootPath }) {
     const data = {};
     
     if (name) {
@@ -81,6 +83,10 @@ export class CategoryModel extends BaseModel {
     
     if (description !== undefined) {
       data.description = description;
+    }
+    
+    if (rootPath !== undefined) {
+      data.rootPath = rootPath;
     }
 
     return this.model.update({

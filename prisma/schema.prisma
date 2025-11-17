@@ -22,7 +22,7 @@ model User {
   files      File[]     @relation("FileOwner")
   categories Category[] @relation("CategoryOwner")
   lessons    Lesson[]   @relation("LessonOwner")
-
+  documents  Document[] @relation("DocumentOwner")
   @@index([role])
 }
 
@@ -73,10 +73,10 @@ model Category {
   ownerId     String?   @db.ObjectId
   owner       User?     @relation("CategoryOwner", fields: [ownerId], references: [id], onDelete: SetNull)
   files       File[]
-  
+  rootPath    String?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime? @updatedAt // ✅ Thêm ?
-
+  documents   Document[] @relation("CategoryDocument")
   @@index([ownerId])
 }
 
@@ -98,4 +98,28 @@ model Lesson {
 
   @@index([ownerId])
   @@index([createdAt])
+}
+model Document {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String?
+  content     String
+
+  categoryId  String?   @db.ObjectId
+  category    Category? @relation("CategoryDocument", fields: [categoryId], references: [id], onDelete: SetNull)
+
+  classes     Int[]     @default([])
+
+  ownerId     String?   @db.ObjectId
+  owner       User?     @relation("DocumentOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+
+  ownerName   String?
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime? @updatedAt
+
+  @@index([categoryId])
+  @@index([ownerId])
+  @@index([createdAt])
+  @@map("documents")
 }

@@ -113,7 +113,7 @@ export class FileModel extends BaseModel {
 
       // Category filter
       if (filters.category && filters.category.trim()) {
-        where.category = filters.category;
+        where.categoryId = filters.category.trim();
       }
 
       // Pagination

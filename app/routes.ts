@@ -6,6 +6,8 @@ export default [
         route(`chuong-trinh-hoc/:class/:file_type`, "routes/media.jsx"),
         route(`suu-tap/:file_type`, "routes/collection.jsx"),
         route(`tuy-chinh/:category`, "routes/category.jsx"),
+        route(`thong-tin-suu-tam/:category`, "routes/document.jsx"),
+        route(`thong-tin-suu-tam/tao-moi`, "routes/document/documentEditor.jsx"),
         route(`tim-kiem`, "routes/search.jsx"),
         route(`chuong-trinh-hoc/bai-giang/create/:classId?`, "routes/dashboard/createLesson.jsx"),
         route(`chuong-trinh-hoc/bai-giang/edit/:lessonId`, "routes/dashboard/editLesson.jsx"),
