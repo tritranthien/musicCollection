@@ -110,15 +110,11 @@ export default function LessonEditor({
             formData.append("intent", "create");
         }
 
-        if (selectedFiles.length > 0) {
-            const fileIds = selectedFiles.map(f => f.id);
-            formData.append("files", JSON.stringify(fileIds));
-        }
+        const fileIds = selectedFiles.map(f => f.id);
+        formData.append("files", JSON.stringify(fileIds));
 
-        if (selectedDocuments.length > 0) {
-            const documentIds = selectedDocuments.map(d => d.id);
-            formData.append("documents", JSON.stringify(documentIds));
-        }
+        const documentIds = selectedDocuments.map(d => d.id);
+        formData.append("documents", JSON.stringify(documentIds));
 
         let redirectUrl;
         if (classId || lesson?.classId) {
