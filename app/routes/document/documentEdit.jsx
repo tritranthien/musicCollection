@@ -1,30 +1,43 @@
 import React from "react";
+import { redirect } from "react-router";
 import { DocumentModel } from "../../.server/document.repo";
-import DocumentEditorComponent from "../../components/DocumentEditorComponent/DocumentEditorComponent";
 import { CategoryModel } from "../../.server/category.repo";
+import { requireAuth } from "../../service/auth.server";
+import { requireUpdatePermission } from "../../service/authorization.server";
+import DocumentEditorComponent from "../../components/DocumentEditorComponent/DocumentEditorComponent";
 
 /**
- * Loader cho route document editor
- * Xử lý cả create và update
+ * Loader cho route document editor (edit mode)
  */
-export async function loader({ params }) {
+export async function loader({ request, params }) {
+  // Require authentication
+  const user = await requireAuth(request);
+
   const { documentId } = params;
-  
-  // Nếu có documentId và không phải 'create', load document để edit
-  if (documentId) {
-    const documentModel = new DocumentModel();
-    const document = await documentModel.findById(documentId);
-    
-    if (!document) {
-      throw new Response("Không tìm thấy tài liệu", { status: 404 });
-    }
-    const categoryModel = new CategoryModel();
-    const category = await categoryModel.findById(document.categoryId);
-    return { document, category };
+
+  if (!documentId) {
+    throw redirect("/bang-dieu-khien");
   }
-  
-  // Ngược lại là create mode
-  return { document: null };
+
+  const documentModel = new DocumentModel();
+  const document = await documentModel.findById(documentId);
+
+  if (!document) {
+    throw new Response("Không tìm thấy tài liệu", { status: 404 });
+  }
+
+  // Check permission: ADMIN/MANAGER edit tất cả, TEACHER chỉ edit của mình
+  try {
+    requireUpdatePermission(user, document);
+  } catch (error) {
+    // Redirect về dashboard nếu không có quyền
+    throw redirect("/bang-dieu-khien");
+  }
+
+  const categoryModel = new CategoryModel();
+  const category = await categoryModel.findById(document.categoryId);
+
+  return { document, category };
 }
 
 /**
@@ -32,7 +45,7 @@ export async function loader({ params }) {
  */
 export default function DocumentEditor({ loaderData }) {
   const { document, category } = loaderData;
-  
+
   return (
     <DocumentEditorComponent
       document={document}

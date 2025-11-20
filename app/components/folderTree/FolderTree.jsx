@@ -6,6 +6,7 @@ import styles from "./FolderTree.module.css";
 import { AddCategoryModal } from "./modal/AddCategoryModal";
 import { DeleteModal } from "./modal/DeleteModal";
 import { EditCategoryModal } from "./modal/EditCategoryModal";
+import { usePermissions } from "../../hooks/usePermissions";
 
 const TreeItem = ({ item, level = 0, onCategoryAdd, currentPath = '', user = null }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -14,7 +15,7 @@ const TreeItem = ({ item, level = 0, onCategoryAdd, currentPath = '', user = nul
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const hasChildren = item.children && item.children.length > 0;
   const canAddCategory = item.custom === true;
-  
+  const permissions = usePermissions();
   const isOwner = item.ownerId === user?.id;
   const fetcher = useFetcherWithReset();
   const isActive = currentPath === item.path ||
@@ -108,7 +109,7 @@ const TreeItem = ({ item, level = 0, onCategoryAdd, currentPath = '', user = nul
 
       <span className={styles.label}>{item.label}</span>
       <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
-        {isOwner && item.edit && (
+        {item.edit && (permissions.isAdmin || permissions.isManager || (permissions.isTeacher && isOwner)) && (
           <>
             <button
               onClick={handleEditClick}
@@ -159,7 +160,7 @@ const TreeItem = ({ item, level = 0, onCategoryAdd, currentPath = '', user = nul
           </>
         )}
 
-        {canAddCategory && (
+        {canAddCategory && permissions.canCreate && (
           <button
             onClick={handleAddClick}
             style={{
@@ -219,7 +220,7 @@ const TreeItem = ({ item, level = 0, onCategoryAdd, currentPath = '', user = nul
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         parentLabel={item.label}
-        onSubmit={(name)=>handleCategorySubmit(name,item.path)}
+        onSubmit={(name) => handleCategorySubmit(name, item.path)}
       />
       <EditCategoryModal
         isOpen={isEditModalOpen}

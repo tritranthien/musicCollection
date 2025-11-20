@@ -7,7 +7,8 @@
     "dev": "cross-env NODE_ENV=development react-router dev",
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc",
-    "create-admin": "tsx scripts/admin.ts"
+    "create-admin": "tsx scripts/admin.ts",
+    "test-email": "tsx scripts/test-email.js"
   },
   "dependencies": {
     "@prisma/client": "^6.18.0",
@@ -39,6 +40,7 @@
     "@tiptap/starter-kit": "^3.10.7",
     "bcryptjs": "^3.0.3",
     "cloudinary": "^2.8.0",
+    "dotenv": "^17.2.3",
     "framer-motion": "^12.23.24",
     "html-to-docx": "^1.8.0",
     "isbot": "^5.1.31",
@@ -48,6 +50,7 @@
     "lucide-react": "^0.552.0",
     "mammoth": "^1.11.0",
     "mongodb": "^6.20.0",
+    "nodemailer": "^7.0.10",
     "prisma": "^6.18.0",
     "puppeteer-core": "^24.30.0",
     "react": "^19.1.1",

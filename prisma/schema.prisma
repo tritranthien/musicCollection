@@ -11,26 +11,38 @@ datasource db {
 }
 
 model User {
-  id        String    @id @default(auto()) @map("_id") @db.ObjectId
-  email     String    @unique
-  name      String
-  role      Role      @default(STUDENT)
-  password  String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime? @updatedAt // ✅ Thêm ? để optional
+  id                String     @id @default(auto()) @map("_id") @db.ObjectId
+  email             String     @unique
+  name              String
+  role              Role       @default(STUDENT)
+  status            UserStatus @default(PENDING)
+  password          String
+  emailVerified     Boolean    @default(false)
+  verificationToken String?
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime?  @updatedAt
 
   files      File[]     @relation("FileOwner")
   categories Category[] @relation("CategoryOwner")
   lessons    Lesson[]   @relation("LessonOwner")
   documents  Document[] @relation("DocumentOwner")
+  
   @@index([role])
+  @@index([status])
 }
 
 enum Role {
   ADMIN
+  MANAGER
   TEACHER
   STUDENT
-  CONTRIBUTOR
+}
+
+enum UserStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  ACTIVE
 }
 
 model File {
@@ -56,7 +68,7 @@ model File {
   ownerName   String?
   
   createdAt   DateTime  @default(now())
-  updatedAt   DateTime? @updatedAt // ✅ Thêm ?
+  updatedAt   DateTime? @updatedAt
 
   @@index([categoryId])
   @@index([ownerId])
@@ -75,8 +87,9 @@ model Category {
   files       File[]
   rootPath    String?
   createdAt   DateTime  @default(now())
-  updatedAt   DateTime? @updatedAt // ✅ Thêm ?
+  updatedAt   DateTime? @updatedAt
   documents   Document[] @relation("CategoryDocument")
+  
   @@index([ownerId])
 }
 
@@ -90,16 +103,17 @@ model Lesson {
   ownerName   String
   
   fileIds     String[]  @db.ObjectId @default([])
-  documentIds String[] @db.ObjectId @default([])
+  documentIds String[]  @db.ObjectId @default([])
 
   classId     Int?
   
   createdAt   DateTime  @default(now())
-  updatedAt   DateTime? @updatedAt // ✅ Thêm ?
+  updatedAt   DateTime? @updatedAt
 
   @@index([ownerId])
   @@index([createdAt])
 }
+
 model Document {
   id          String    @id @default(auto()) @map("_id") @db.ObjectId
   title       String

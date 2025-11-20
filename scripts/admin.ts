@@ -1,39 +1,46 @@
-import bcrypt from "bcryptjs";
-import { PrismaClient } from "../generated/prisma/client";
+// prisma/seed.js
+import { PrismaClient } from '../generated/prisma/client';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  const email = process.argv[2];
-  const name = process.argv[3] || "Administrator";
+  console.log('🌱 Bắt đầu seed database...');
 
-  if (!email) {
-    console.error("❌ Missing email argument. Example:");
-    console.error("   npm run create-admin admin@example.com 'Admin User'");
-    process.exit(1);
-  }
-
-  const password = "seven007";
-  const hashedPassword = await bcrypt.hash(password, 10);
-
-  const existing = await prisma.user.findUnique({ where: { email } });
-  if (existing) {
-    console.log(`⚠️ User with email ${email} already exists.`);
-    process.exit(0);
-  }
-
-  const admin = await prisma.user.create({
-    data: { name, email, password: hashedPassword, role: "ADMIN" },
+  // Kiểm tra xem đã có ADMIN chưa
+  const existingAdmin = await prisma.user.findFirst({
+    where: { role: 'ADMIN' }
   });
 
-  console.log("✅ Admin created successfully!");
-  console.log(`Email: ${admin.email}`);
-  console.log(`Password: ${password}`);
+  if (existingAdmin) {
+    console.log('✅ ADMIN đã tồn tại:', existingAdmin.email);
+    return;
+  }
+
+  // Tạo tài khoản ADMIN mặc định
+  const adminPassword = process.env.ADMIN_PASSWORD || 'seven007';
+  const hashedPassword = await bcrypt.hash(adminPassword, 10);
+
+  const admin = await prisma.user.create({
+    data: {
+      email: 'admin@musiccollection.com',
+      name: 'Administrator',
+      role: 'ADMIN',
+      status: 'ACTIVE',
+      password: hashedPassword,
+      emailVerified: true,
+    }
+  });
+
+  console.log('✅ Đã tạo tài khoản ADMIN:');
+  console.log('   Email:', admin.email);
+  console.log('   Password:', adminPassword);
+  console.log('   ⚠️  Vui lòng đổi mật khẩu sau khi đăng nhập lần đầu!');
 }
 
 main()
-  .catch((err) => {
-    console.error(err);
+  .catch((e) => {
+    console.error('❌ Lỗi khi seed:', e);
     process.exit(1);
   })
   .finally(async () => {

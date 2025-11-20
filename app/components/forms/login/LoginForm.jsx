@@ -75,7 +75,7 @@ export default function LoginPage() {
           <p style={{ marginTop: "1rem", textAlign: "center" }}>
             Chưa có tài khoản?{" "}
             <a
-              href="/register"
+              href="/dang-ky"
               style={{ color: "#4f46e5", fontWeight: "500", textDecoration: "none" }}
             >
               Đăng ký ngay

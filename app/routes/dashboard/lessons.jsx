@@ -7,6 +7,7 @@ import styles from "../../globals/styles/lessonList.module.css";
 import { useDocumentExport } from "../../hooks/useDownloadDoc";
 import { useFileDownload } from "../../hooks/useDownloadFile";
 import { useFetcherWithReset } from "../../hooks/useFetcherWithReset";
+import { usePermissions } from "../../hooks/usePermissions";
 
 export async function loader({ params }) {
   const { classId } = params;
@@ -23,9 +24,11 @@ export default function LessonList({ loaderData }) {
   const [selectedItem, setSelectedItem] = useState(null); // can be lesson | file | document
   const [selectedType, setSelectedType] = useState(null); // 'lesson' | 'file' | 'document'
   const [expandedLessons, setExpandedLessons] = useState(new Set());
+  const [expandedSections, setExpandedSections] = useState({}); // Track expanded sections (documents/files)
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [lessonToDelete, setLessonToDelete] = useState(null);
   const [downloadingLesson, setDownloadingLesson] = useState(null);
+  const permissions = usePermissions();
   const { downloadPDF, downloadWord, downloadingPdf, downloadingWord } = useDocumentExport();
 
   const handleLessonClick = (lesson) => {
@@ -57,6 +60,18 @@ export default function LessonList({ loaderData }) {
   };
 
   const isExpanded = (lessonId) => expandedLessons.has(lessonId);
+
+  const toggleSection = (e, lessonId, section) => {
+    e.stopPropagation();
+    setExpandedSections(prev => ({
+      ...prev,
+      [`${lessonId}-${section}`]: !prev[`${lessonId}-${section}`]
+    }));
+  };
+
+  const isSectionExpanded = (lessonId, section) => {
+    return expandedSections[`${lessonId}-${section}`] !== false; // default true
+  };
 
   const formatFileSize = (bytes) => {
     if (!bytes && bytes !== 0) return "—";
@@ -294,7 +309,7 @@ export default function LessonList({ loaderData }) {
     if (!selectedItem) return;
     if (selectedType === "document") {
       // open a simple modal or navigate to document page; we'll navigate to a viewer route
-      navigate(`/bang-dieu-khien/thong-tin-suu-tam/view/${selectedItem.id}`);
+      navigate(`/bang-dieu-khien/thong-tin-suu-tam/xem/${selectedItem.id}`);
     } else {
       toast.error("Chỉ dành cho tài liệu");
     }
@@ -306,12 +321,14 @@ export default function LessonList({ loaderData }) {
       <div className={styles.leftPanel}>
         <div className={styles.header}>
           <h1 className={styles.title}>📚 Danh sách bài giảng – Lớp {classId}</h1>
-          <button
-            className={styles.addBtn}
-            onClick={() => navigate(`/bang-dieu-khien/chuong-trinh-hoc/bai-giang/create/${classId}`)}
-          >
-            ➕ Thêm bài giảng
-          </button>
+          {permissions.canCreate && (
+            <button
+              className={styles.addBtn}
+              onClick={() => navigate(`/bang-dieu-khien/chuong-trinh-hoc/bai-giang/create/${classId}`)}
+            >
+              ➕ Thêm bài giảng
+            </button>
+          )}
         </div>
 
         {lessons && lessons.length > 0 ? (
@@ -336,7 +353,12 @@ export default function LessonList({ loaderData }) {
                       <tr
                         className={`${styles.lessonRow} ${selectedType === "lesson" && selectedItem?.id === lesson.id ? styles.selected : ""
                           }`}
-                        onClick={() => handleLessonClick(lesson)}
+                        onClick={(e) => {
+                          // Don't expand if clicking on action buttons
+                          if (e.target.closest(`.${styles.lessonActions}`)) return;
+                          toggleExpand(e, lesson.id);
+                          handleLessonClick(lesson);
+                        }}
                       >
                         <td>
                           <div className={styles.lessonTitleCell}>
@@ -360,20 +382,24 @@ export default function LessonList({ loaderData }) {
                             >
                               {downloadingLesson === lesson.id ? "⏳" : "📦"}
                             </button>
-                            <button
-                              className={`${styles.actionIcon} ${styles.editIcon}`}
-                              onClick={(e) => handleEditLesson(e, lesson.id)}
-                              title="Chỉnh sửa"
-                            >
-                              ✏️
-                            </button>
-                            <button
-                              className={`${styles.actionIcon} ${styles.deleteIcon}`}
-                              onClick={(e) => handleDeleteClick(e, lesson)}
-                              title="Xóa"
-                            >
-                              🗑️
-                            </button>
+                            {(permissions.isAdmin || permissions.isManager || (permissions.isTeacher && lesson.ownerId === permissions.userId)) && (
+                              <>
+                                <button
+                                  className={`${styles.actionIcon} ${styles.editIcon}`}
+                                  onClick={(e) => handleEditLesson(e, lesson.id)}
+                                  title="Chỉnh sửa"
+                                >
+                                  ✏️
+                                </button>
+                                <button
+                                  className={`${styles.actionIcon} ${styles.deleteIcon}`}
+                                  onClick={(e) => handleDeleteClick(e, lesson)}
+                                  title="Xóa"
+                                >
+                                  🗑️
+                                </button>
+                              </>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -383,12 +409,20 @@ export default function LessonList({ loaderData }) {
                         <>
                           {/* Documents section */}
                           <tr className={styles.sectionLabelRow}>
-                            <td colSpan="3" className={styles.sectionLabel}>
+                            <td
+                              colSpan="3"
+                              className={styles.sectionLabel}
+                              onClick={(e) => toggleSection(e, lesson.id, 'documents')}
+                              style={{ cursor: 'pointer', userSelect: 'none' }}
+                            >
+                              <span className={`${styles.expandIcon} ${isSectionExpanded(lesson.id, 'documents') ? styles.expanded : ""}`}>
+                                ▶
+                              </span>
                               📄 Tài liệu ({documents.length})
                             </td>
                           </tr>
 
-                          {documents && documents.length > 0 ? (
+                          {isSectionExpanded(lesson.id, 'documents') && (documents && documents.length > 0 ? (
                             documents.map((doc, idx) => (
                               <tr
                                 key={`${lesson.id}-doc-${doc.id || idx}`}
@@ -407,16 +441,24 @@ export default function LessonList({ loaderData }) {
                                 Không có tài liệu
                               </td>
                             </tr>
-                          )}
+                          ))}
 
                           {/* Files section */}
                           <tr className={styles.sectionLabelRow}>
-                            <td colSpan="3" className={styles.sectionLabel}>
+                            <td
+                              colSpan="3"
+                              className={styles.sectionLabel}
+                              onClick={(e) => toggleSection(e, lesson.id, 'files')}
+                              style={{ cursor: 'pointer', userSelect: 'none' }}
+                            >
+                              <span className={`${styles.expandIcon} ${isSectionExpanded(lesson.id, 'files') ? styles.expanded : ""}`}>
+                                ▶
+                              </span>
                               📂 Files đính kèm ({files.length})
                             </td>
                           </tr>
 
-                          {files && files.length > 0 ? (
+                          {isSectionExpanded(lesson.id, 'files') && (files && files.length > 0 ? (
                             files.map((file, idx) => (
                               <tr
                                 key={`${lesson.id}-file-${file.id || idx}`}
@@ -437,7 +479,7 @@ export default function LessonList({ loaderData }) {
                                 Không có file nào
                               </td>
                             </tr>
-                          )}
+                          ))}
                         </>
                       )}
                     </React.Fragment>
@@ -530,18 +572,22 @@ export default function LessonList({ loaderData }) {
                   >
                     {downloadingLesson === selectedItem.id ? "⏳ Đang tải..." : "📦 Tải xuống tất cả files (ZIP)"}
                   </button>
-                  <button
-                    className={`${styles.actionBtn} ${styles.editDetailButton}`}
-                    onClick={() => navigate(`/bang-dieu-khien/chuong-trinh-hoc/bai-giang/edit/${selectedItem.id}`)}
-                  >
-                    ✏️ Chỉnh sửa bài giảng
-                  </button>
-                  <button
-                    className={`${styles.actionBtn} ${styles.deleteDetailButton}`}
-                    onClick={(e) => handleDeleteClick(e, selectedItem)}
-                  >
-                    🗑️ Xóa bài giảng
-                  </button>
+                  {(permissions.isAdmin || permissions.isManager || (permissions.isTeacher && selectedItem.ownerId === permissions.userId)) && (
+                    <>
+                      <button
+                        className={`${styles.actionBtn} ${styles.editDetailButton}`}
+                        onClick={() => navigate(`/bang-dieu-khien/chuong-trinh-hoc/bai-giang/edit/${selectedItem.id}`)}
+                      >
+                        ✏️ Chỉnh sửa bài giảng
+                      </button>
+                      <button
+                        className={`${styles.actionBtn} ${styles.deleteDetailButton}`}
+                        onClick={(e) => handleDeleteClick(e, selectedItem)}
+                      >
+                        🗑️ Xóa bài giảng
+                      </button>
+                    </>
+                  )}
                 </div>
               </>
             )}
@@ -696,14 +742,17 @@ export default function LessonList({ loaderData }) {
                   >
                     {downloadingWord === selectedItem.id ? "🔄 Đang tải..." : "📄 Tải về Word"}
                   </button>
+                  {(permissions.isAdmin || permissions.isManager || (permissions.isTeacher && selectedItem.ownerId === permissions.userId)) && (
+                    <>
+                      <button
+                        className={`${styles.actionBtn} ${styles.editDetailButton}`}
+                        onClick={() => navigate(`/bang-dieu-khien/thong-tin-suu-tam/chinh-sua/${selectedItem.id}`)}
+                      >
+                        ✏️ Chỉnh sửa tài liệu
+                      </button>
 
-                  <button
-                    className={`${styles.actionBtn} ${styles.editDetailButton}`}
-                    onClick={() => navigate(`/bang-dieu-khien/thong-tin-suu-tam/chinh-sua/${selectedItem.id}`)}
-                  >
-                    ✏️ Chỉnh sửa tài liệu
-                  </button>
-
+                    </>
+                  )}
                   <button className={`${styles.actionBtn} ${styles.editDetailButton}`} onClick={handleViewContent}>
                     👁️ Xem toàn bộ nội dung
                   </button>

@@ -9,6 +9,7 @@ import { useDocumentExport } from "../hooks/useDownloadDoc";
 import { useFetcherWithReset } from "../hooks/useFetcherWithReset";
 import useDocumentFilter from "../hooks/useFilterDoc";
 import Pagination from "../components/pagination/Pagination";
+import { usePermissions } from "../hooks/usePermissions";
 
 export async function loader({ params }) {
   const { categorySlug } = params;
@@ -26,6 +27,7 @@ export default function DocumentList({ loaderData }) {
   const [selectedDocument, setSelectedDocument] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [documentToDelete, setDocumentToDelete] = useState(null);
+  const permissions = usePermissions();
   const { downloadPDF, downloadWord, downloadingPdf, downloadingWord } = useDocumentExport();
   const disabledFilters = ['category'];
   const initialFilters = {
@@ -156,12 +158,14 @@ export default function DocumentList({ loaderData }) {
       <div className={styles.leftPanel}>
         <div className={styles.header}>
           <h1 className={styles.title}>📚 Danh sách tài liệu văn học</h1>
-          <button
-            className={styles.addBtn}
-            onClick={() => navigate(`/bang-dieu-khien/thong-tin-suu-tam/tao-moi/${categoryId}`)}
-          >
-            ➕ Thêm tài liệu
-          </button>
+          {permissions.canCreate && (
+            <button
+              className={styles.addBtn}
+              onClick={() => navigate(`/bang-dieu-khien/thong-tin-suu-tam/tao-moi/${categoryId}`)}
+            >
+              ➕ Thêm tài liệu
+            </button>
+          )}
         </div>
 
         <DocumentFilterAdvanced
@@ -224,20 +228,22 @@ export default function DocumentList({ loaderData }) {
                             >
                               👁️
                             </button>
-                            <button
-                              className={`${styles.actionIcon} ${styles.editIcon}`}
-                              onClick={(e) => handleEditDocument(e, document.id)}
-                              title="Chỉnh sửa"
-                            >
-                              ✏️
-                            </button>
-                            <button
-                              className={`${styles.actionIcon} ${styles.deleteIcon}`}
-                              onClick={(e) => handleDeleteClick(e, document)}
-                              title="Xóa"
-                            >
-                              🗑️
-                            </button>
+                            {(permissions.isAdmin || permissions.isManager || (permissions.isTeacher && selectedDocument.ownerId === permissions.userId)) && (
+                              <><button
+                                className={`${styles.actionIcon} ${styles.editIcon}`}
+                                onClick={(e) => handleEditDocument(e, document.id)}
+                                title="Chỉnh sửa"
+                              >
+                                ✏️
+                              </button>
+                                <button
+                                  className={`${styles.actionIcon} ${styles.deleteIcon}`}
+                                  onClick={(e) => handleDeleteClick(e, document)}
+                                  title="Xóa"
+                                >
+                                  🗑️
+                                </button></>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -270,12 +276,14 @@ export default function DocumentList({ loaderData }) {
               {filteredDocuments.length === 0 ? (
                 <>
                   <p>📭 Chưa có tài liệu nào</p>
-                  <button
-                    className={styles.addBtnLarge}
-                    onClick={() => navigate(`/bang-dieu-khien/thong-tin-suu-tam/tao-moi/${categoryId}`)}
-                  >
-                    ➕ Tạo tài liệu đầu tiên
-                  </button>
+                  {permissions.canCreate && (
+                    <button
+                      className={styles.addBtnLarge}
+                      onClick={() => navigate(`/bang-dieu-khien/thong-tin-suu-tam/tao-moi/${categoryId}`)}
+                    >
+                      ➕ Tạo tài liệu đầu tiên
+                    </button>
+                  )}
                 </>
               ) : (
                 <p>🔍 Không tìm thấy tài liệu phù hợp với bộ lọc</p>
@@ -440,24 +448,28 @@ export default function DocumentList({ loaderData }) {
               >
                 {downloadingWord === selectedDocument.id ? ' 🔄 Đang tải...' : ' 📄 Tải về Word'}
               </button>
-              <button
-                className={`${styles.detailActionButton} ${styles.editDetailButton}`}
-                onClick={() => navigate(`/bang-dieu-khien/thong-tin-suu-tam/chinh-sua/${selectedDocument.id}`)}
-              >
-                ✏️ Chỉnh sửa tài liệu
-              </button>
+              {(permissions.isAdmin || permissions.isManager || (permissions.isTeacher && selectedDocument.ownerId === permissions.userId)) && (
+                <button
+                  className={`${styles.detailActionButton} ${styles.editDetailButton}`}
+                  onClick={() => navigate(`/bang-dieu-khien/thong-tin-suu-tam/chinh-sua/${selectedDocument.id}`)}
+                >
+                  ✏️ Chỉnh sửa tài liệu
+                </button>
+              )}
               <button
                 className={`${styles.detailActionButton} ${styles.viewDetailButton}`}
                 onClick={handleViewContent}
               >
                 👁️ Xem toàn bộ nội dung
               </button>
-              <button
-                className={`${styles.detailActionButton} ${styles.deleteDetailButton}`}
-                onClick={(e) => handleDeleteClick(e, selectedDocument)}
-              >
-                🗑️ Xóa tài liệu
-              </button>
+              {(permissions.isAdmin || permissions.isManager || (permissions.isTeacher && selectedDocument.ownerId === permissions.userId)) && (
+                <button
+                  className={`${styles.detailActionButton} ${styles.deleteDetailButton}`}
+                  onClick={(e) => handleDeleteClick(e, selectedDocument)}
+                >
+                  🗑️ Xóa tài liệu
+                </button>
+              )}
             </div>
           </>
         ) : (

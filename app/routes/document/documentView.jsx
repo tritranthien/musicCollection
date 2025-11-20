@@ -2,6 +2,7 @@ import { useNavigate } from "react-router";
 import { DocumentModel } from "../../.server/document.repo";
 import styles from "../../globals/styles/documentView.module.css";
 import { useDocumentExport } from "../../hooks/useDownloadDoc";
+import { usePermissions } from "../../hooks/usePermissions";  // ← THÊM DÒNG NÀY
 
 /**
  * DocumentViewer - Hiển thị nội dung tài liệu đã lưu
@@ -19,6 +20,7 @@ export default function DocumentViewer({ loaderData }) {
   const { document } = loaderData;
   const { downloadPDF, downloadWord, downloadingPdf, downloadingWord } = useDocumentExport();
   const navigate = useNavigate();
+  const permissions = usePermissions();
 
   if (!document) {
     return (
@@ -80,12 +82,14 @@ export default function DocumentViewer({ loaderData }) {
           >
             {downloadingWord === document.id ? 'Đang tải...' : '📖 Tải về Word'}
           </button>
-          <button
-            className={styles.editBtn}
-            onClick={handleEdit}
-          >
-            ✏️ Chỉnh sửa
-          </button>
+          {(permissions.isAdmin || permissions.isManager || (permissions.isTeacher && document.ownerId === permissions.userId)) && (
+            <button
+              className={styles.editBtn}
+              onClick={handleEdit}
+            >
+              ✏️ Chỉnh sửa
+            </button>
+          )}
         </div>
       </div>
 
@@ -154,12 +158,14 @@ export default function DocumentViewer({ loaderData }) {
         >
           ← Quay lại danh sách
         </button>
-        <button
-          className={styles.editBtnLarge}
-          onClick={handleEdit}
-        >
-          ✏️ Chỉnh sửa tài liệu
-        </button>
+        {(permissions.isAdmin || permissions.isManager || (permissions.isTeacher && document.ownerId === permissions.userId)) && (
+          <button
+            className={styles.editBtnLarge}
+            onClick={handleEdit}
+          >
+            ✏️ Chỉnh sửa tài liệu
+          </button>
+        )}
       </footer>
     </div>
   );

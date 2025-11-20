@@ -1,7 +1,10 @@
 import { type RouteConfig, index, layout, route } from "@react-router/dev/routes";
 export default [
     index("routes/home.tsx"),
-    route("bang-dieu-khien", "routes/Dashboard.jsx",[
+    route("bang-dieu-khien", "routes/Dashboard.jsx", {
+        id: "dashboard",
+    }, [
+        index("routes/indexDashboard.jsx"),
         route(`chuong-trinh-hoc/bai-giang/:classId`, "routes/dashboard/lessons.jsx"),
         route(`chuong-trinh-hoc/:class/:file_type`, "routes/media.jsx"),
         route(`suu-tap/:file_type`, "routes/collection.jsx"),
@@ -13,10 +16,12 @@ export default [
         route(`tim-kiem`, "routes/search.jsx"),
         route(`chuong-trinh-hoc/bai-giang/create/:classId?`, "routes/dashboard/createLesson.jsx"),
         route(`chuong-trinh-hoc/bai-giang/edit/:lessonId`, "routes/dashboard/editLesson.jsx"),
+        route("admin", "routes/admin.jsx"),
     ]),
     layout("layouts/authen/Authen.jsx", [
-        route("login", "routes/Login.jsx"),
-        route("register", "routes/Register.jsx"),
+        route("dang-nhap", "routes/Login.jsx"),
+        route("dang-ky", "routes/Register.jsx"),
+        route("verify-email", "routes/VerifyEmail.jsx"),
     ]),
     route("logout", "routes/actions/logout.jsx"),
     route("upload/:path", "routes/actions/upload.jsx"),

@@ -14,6 +14,7 @@ import { useLocation } from "react-router";
 import { getFilePreview } from "../../helper/uiHelper.jsx";
 import { useFileDownload } from "../../hooks/useDownloadFile.js";
 import Pagination from "../pagination/Pagination.jsx";
+import { usePermissions } from "../../hooks/usePermissions.js";
 const fileTypeMap = {
   "videos": "video",
   "audios": "audio",
@@ -33,7 +34,7 @@ export default function FileLibraryPage({ files, fileType = "raw", classMate = n
   const { loading: updateLoading, error: updateError, data: updateData, updateFile, deleteFile } = useUpdateFile();
   const { upload, loading, error, data } = useUpload();
   const { downloadFile, downloading } = useFileDownload();
-
+  const permissions = usePermissions();
   const initFilterGenerator = useMemo(() => {
     let temp = {
       search: "",
@@ -157,14 +158,16 @@ export default function FileLibraryPage({ files, fileType = "raw", classMate = n
     <>
       <div className={styles.header}>
         <h2>{pageName}</h2>
-        <button className={styles.uploadBtn} onClick={() => setModalOpen(true)}>
-          <svg className={styles.icon} viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            <polyline points="7 9 12 4 17 9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            <line x1="12" y1="4" x2="12" y2="16" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-          Tải lên
-        </button>
+        {permissions.canCreate && (
+          <button className={styles.uploadBtn} onClick={() => setModalOpen(true)}>
+            <svg className={styles.icon} viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <polyline points="7 9 12 4 17 9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <line x1="12" y1="4" x2="12" y2="16" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            Tải lên
+          </button>
+        )}
       </div>
       <div className={styles.filterContainer}>
         <FileFilter
@@ -278,18 +281,20 @@ export default function FileLibraryPage({ files, fileType = "raw", classMate = n
                   >
                     <Download size={18} />
                   </button>
-                  <button
-                    onClick={handleEditClick}
-                    className={styles.viewBtn}
-                  >
-                    <Pencil size={18} />
-                  </button>
-                  <button
-                    onClick={() => setIsDeleteModalOpen(true)}
-                    className={styles.deleteBtn}
-                  >
-                    <Trash2 size={18} />
-                  </button>
+                  {(permissions.isAdmin || permissions.isManager || (permissions.isTeacher && clickedFile.ownerId === permissions.userId)) && (
+                    <><button
+                      onClick={handleEditClick}
+                      className={styles.viewBtn}
+                    >
+                      <Pencil size={18} />
+                    </button>
+                      <button
+                        onClick={() => setIsDeleteModalOpen(true)}
+                        className={styles.deleteBtn}
+                      >
+                        <Trash2 size={18} />
+                      </button></>
+                  )}
                 </div>
                 <h3>📄 Chi tiết tệp</h3>
                 {
@@ -332,7 +337,12 @@ export default function FileLibraryPage({ files, fileType = "raw", classMate = n
                 <p><strong>Kích thước:</strong> {(clickedFile.size / 1024).toFixed(1)} KB</p>
                 <p><strong>Ngày tải lên:</strong> {new Date(clickedFile.createdAt).toLocaleString()}</p>
                 <p><strong>Thẻ:</strong></p>
-                <ClassSelector selected={clickedFile.classes} onChange={(newClasses) => handleClassesChange(clickedFile.id, newClasses)} fixedClasses={classMate ? clickedFile.classes : null} />
+                <ClassSelector
+                  selected={clickedFile.classes}
+                  onChange={(newClasses) => handleClassesChange(clickedFile.id, newClasses)}
+                  fixedClasses={classMate ? clickedFile.classes : null}
+                  isDisabled={!(permissions.isAdmin || permissions.isManager || (permissions.isTeacher && clickedFile.ownerId === permissions.userId))}
+                />
               </motion.div>
             )}
           </AnimatePresence>

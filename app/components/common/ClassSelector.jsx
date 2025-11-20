@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import styles from "./ClassSelector.module.css";
 import Portal from "./Portal";
 
-export default function ClassSelector({ selected = [], onChange, fixedClasses = null }) {
+export default function ClassSelector({ selected = [], onChange, fixedClasses = null, isDisabled = false }) {
   const [isOpen, setIsOpen] = useState(false);
   const ref = useRef();
   const buttonRef = useRef();
@@ -10,16 +10,16 @@ export default function ClassSelector({ selected = [], onChange, fixedClasses = 
   const [dropUp, setDropUp] = useState(false);
 
   useEffect(() => {
-  if (isOpen && buttonRef.current) {
-    const r = buttonRef.current.getBoundingClientRect();
-    const dropdownHeight = 200; // maxHeight của dropdown
-    const spaceBelow = window.innerHeight - (r.bottom + 6);
-    const spaceAbove = r.top - 6;
+    if (isOpen && buttonRef.current) {
+      const r = buttonRef.current.getBoundingClientRect();
+      const dropdownHeight = 200; // maxHeight của dropdown
+      const spaceBelow = window.innerHeight - (r.bottom + 6);
+      const spaceAbove = r.top - 6;
 
-    setDropUp(spaceBelow < dropdownHeight && spaceAbove > dropdownHeight);
-    setRect(r);
-  }
-}, [isOpen]);
+      setDropUp(spaceBelow < dropdownHeight && spaceAbove > dropdownHeight);
+      setRect(r);
+    }
+  }, [isOpen]);
   useEffect(() => {
     function handleClickOutside(e) {
       if (ref.current && !ref.current.contains(e.target)) {
@@ -50,15 +50,15 @@ export default function ClassSelector({ selected = [], onChange, fixedClasses = 
     <div className={styles.wrapper} ref={ref}>
       <div
         ref={buttonRef}
-        className={`${styles.field} ${fixedClasses ? styles.disabled : ""}`}
-        onClick={() => !fixedClasses && setIsOpen(!isOpen)}
+        className={`${styles.field} ${fixedClasses || isDisabled ? styles.disabled : ""}`}
+        onClick={() => !fixedClasses && !isDisabled && setIsOpen(!isOpen)}
       >
         {displayClasses.length > 0 ? (
           displayClasses.map((cls) => (
             <span key={cls} className={styles.tag} onClick={(e) => e.stopPropagation()}>
               Lớp {cls}
               {/* Hiển thị nút xóa nếu không có fixedClasses */}
-              {!fixedClasses && (
+              {!fixedClasses && !isDisabled && (
                 <button
                   type="button"
                   className={styles.removeBtn}
@@ -74,9 +74,9 @@ export default function ClassSelector({ selected = [], onChange, fixedClasses = 
         )}
       </div>
 
-      {isOpen && !fixedClasses && rect && (
+      {isOpen && !fixedClasses && rect && !isDisabled && (
         <Portal>
-          <div 
+          <div
             className={styles.dropdown}
             style={{
               top: dropUp ? rect.top - 200 - 6 + window.scrollY : rect.bottom + 6 + window.scrollY,

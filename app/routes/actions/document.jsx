@@ -1,54 +1,27 @@
 // api/document.js
 import { DocumentModel } from '../../.server/document.repo';
-import { getUser } from '../../service/auth.server';
+import { requireAuth } from '../../service/auth.server';
+import {
+  requireCreatePermission,
+  requireUpdatePermission,
+  requireDeletePermission,
+} from '../../service/authorization.server';
 
 export async function action({ request }) {
-  // Kiểm tra authentication
-  const user = await getUser(request);
-
-  const formData = await request.formData();
-  const intent = formData.get('intent');
   const documentModel = new DocumentModel();
 
   try {
+    // Require authentication
+    const user = await requireAuth(request);
+
+    const formData = await request.formData();
+    const intent = formData.get('intent');
+
     switch (intent) {
-      case 'delete': {
-        const documentId = formData.get('documentId');
-
-        if (!documentId) {
-          return {
-            error: 'Document ID is required',
-            status: 400
-          };
-        }
-
-        // Kiểm tra quyền sở hữu document
-        const document = await documentModel.findById(documentId);
-
-        if (!document) {
-          return {
-            error: 'Document not found',
-            status: 404
-          };
-        }
-
-        // Chỉ cho phép owner hoặc admin xóa
-        if (document.ownerId !== user.id && !user.isAdmin) {
-          return {
-            error: 'Unauthorized to delete this document',
-            status: 403
-          };
-        }
-
-        await documentModel.delete(documentId);
-
-        return {
-          success: true,
-          message: 'Document deleted successfully'
-        };
-      }
-
       case 'create': {
+        // Check permission: STUDENT không được tạo
+        requireCreatePermission(user);
+
         const data = {
           title: formData.get('title'),
           description: formData.get('description'),
@@ -61,47 +34,40 @@ export async function action({ request }) {
 
         // Validation
         if (!data.title || !data.content) {
-          return {
-            error: 'Title and content are required',
-            status: 400
-          };
+          return Response.json({
+            error: 'Title and content are required'
+          }, { status: 400 });
         }
 
         const document = await documentModel.create(data);
 
-        return {
+        return Response.json({
           success: true,
           document,
           message: 'Document created successfully'
-        };
+        });
       }
 
       case 'update': {
         const documentId = formData.get('documentId');
 
         if (!documentId) {
-          return {
-            error: 'Document ID is required',
-            status: 400
-          };
+          return Response.json({
+            error: 'Document ID is required'
+          }, { status: 400 });
         }
 
-        // Kiểm tra quyền sở hữu
+        // Get existing document
         const existingDocument = await documentModel.findById(documentId);
 
         if (!existingDocument) {
-          return {
-            error: 'Document not found',
-            status: 404
-          };
+          return Response.json({
+            error: 'Document not found'
+          }, { status: 404 });
         }
 
-        if (existingDocument.ownerId !== user.id && !user.isAdmin) {
-          return {
-            error: 'Unauthorized to update this document',
-            status: 403
-          };
-        }
+        // Check permission: ADMIN/MANAGER update tất cả, TEACHER chỉ update của mình
+        requireUpdatePermission(user, existingDocument);
 
         const data = {
           title: formData.get('title'),
@@ -113,23 +79,57 @@ export async function action({ request }) {
 
         const document = await documentModel.update(documentId, data);
 
-        return {
+        return Response.json({
           success: true,
           document,
           message: 'Document updated successfully'
-        };
+        });
       }
+
+      case 'delete': {
+        const documentId = formData.get('documentId');
+
+        if (!documentId) {
+          return Response.json({
+            error: 'Document ID is required'
+          }, { status: 400 });
+        }
+
+        // Get existing document
+        const document = await documentModel.findById(documentId);
+
+        if (!document) {
+          return Response.json({
+            error: 'Document not found'
+          }, { status: 404 });
+        }
+
+        // Check permission: ADMIN/MANAGER delete tất cả, TEACHER chỉ delete của mình
+        requireDeletePermission(user, document);
+
+        await documentModel.delete(documentId);
+
+        return Response.json({
+          success: true,
+          message: 'Document deleted successfully'
+        });
+      }
+
       default:
-        return {
-          error: 'Invalid intent',
-          status: 400
-        };
+        return Response.json({
+          error: 'Invalid intent'
+        }, { status: 400 });
     }
   } catch (error) {
     console.error('Document API error:', error);
-    return {
-      error: error.message || 'Internal server error',
-      status: 500
-    };
+
+    // Handle authorization errors
+    if (error instanceof Response) {
+      throw error;
+    }
+
+    return Response.json({
+      error: error.message || 'Internal server error'
+    }, { status: 500 });
   }
 }

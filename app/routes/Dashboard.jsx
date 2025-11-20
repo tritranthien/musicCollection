@@ -3,6 +3,7 @@ import { TreeSidebar } from "../components/folderTree/FolderTree";
 import Header from "../components/header/Header";
 import styles from "../globals/styles/main.module.css";
 import { getUser } from "../service/auth.server";
+import { canManageUsers, getUserPermissions } from "../service/authorization.server";
 import { menuData } from "../utils/menuData";
 import { CategoryModel } from "../.server/category.repo";
 import { CategoryProvider } from "../context/CategoryContext";
@@ -12,13 +13,23 @@ import { useEffect } from "react";
 
 export async function loader({ request }) {
   const user = await getUser(request);
+  if (!user) throw redirect("/dang-nhap");
+
+  const isManager = await canManageUsers(user);
+  let existMenuData = menuData;
+  if (!isManager) {
+    existMenuData = menuData.filter((item) => item.path !== '/bang-dieu-khien/admin');
+  }
+  // Get user permissions
+  const permissions = getUserPermissions(user);
+
   const categoryModel = new CategoryModel();
   const customCategories = await categoryModel.findAll();
   const session = await getSession(request.headers.get("Cookie"));
   let message = session.get("message");
-  if (!user) throw redirect("/login");
+
   const menuList = [
-    ...menuData,
+    ...existMenuData,
     {
       label: 'Sưu tập',
       path: '/suu-tap',
@@ -61,7 +72,14 @@ export async function loader({ request }) {
       ]
     }
   ];
-  return Response.json({ user, message, menuList, customCategories}, {
+
+  return Response.json({
+    user,
+    permissions, // ← Thêm permissions
+    message,
+    menuList,
+    customCategories
+  }, {
     headers: {
       "Set-Cookie": await commitSession(session),
     }

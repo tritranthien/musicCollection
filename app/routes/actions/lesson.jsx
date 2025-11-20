@@ -1,26 +1,38 @@
 import { redirect } from "react-router";
 import { LessonModel } from "../../.server/lesson.repo";
-import { getUser } from "../../service/auth.server";
+import { requireAuth } from "../../service/auth.server";
+import {
+  requireCreatePermission,
+  requireUpdatePermission,
+  requireDeletePermission,
+  getOwnerFilter,
+} from "../../service/authorization.server";
 import { commitSession, getSession } from "../../sessions.server";
 
 export async function action({ request }) {
-  const formData = await request.formData();
-  const intent = formData.get("intent");
-  const user = await getUser(request);
   const lessonModel = new LessonModel();
-  const redirectUrl = formData.get("redirectUrl");
 
   try {
+    // Require authentication
+    const user = await requireAuth(request);
+
+    const formData = await request.formData();
+    const intent = formData.get("intent");
+    const redirectUrl = formData.get("redirectUrl");
+
     switch (intent) {
       case "create": {
+        // Check permission: STUDENT không được tạo
+        requireCreatePermission(user);
+
         const title = formData.get("title");
         const description = formData.get("description");
         const classId = formData.get("classId");
         const filesJson = formData.get("files");
         const documentsJson = formData.get("documents");
-        
+
         // Validate
-        if (!title || !user.id) {
+        if (!title) {
           return Response.json(
             { error: "Thiếu thông tin bắt buộc" },
             { status: 400 }
@@ -49,6 +61,7 @@ export async function action({ request }) {
           title,
           description,
           ownerId: user.id,
+          ownerName: user.name,
           classId: classId ? Number(classId) : null,
           fileIds: files,
           documentIds: documents,
@@ -65,10 +78,10 @@ export async function action({ request }) {
         }
 
         return Response.json(
-          { 
-            success: true, 
+          {
+            success: true,
             message: "Tạo bài giảng thành công",
-            lesson: newLesson 
+            lesson: newLesson
           },
           { status: 201 }
         );
@@ -88,6 +101,18 @@ export async function action({ request }) {
             { status: 400 }
           );
         }
+
+        // Get existing lesson
+        const existingLesson = await lessonModel.findById(id);
+        if (!existingLesson) {
+          return Response.json(
+            { error: "Bài giảng không tồn tại" },
+            { status: 404 }
+          );
+        }
+
+        // Check permission: ADMIN/MANAGER update tất cả, TEACHER chỉ update của mình
+        requireUpdatePermission(user, existingLesson);
 
         const files = filesJson ? JSON.parse(filesJson) : undefined;
         const documents = documentsJson ? JSON.parse(documentsJson) : undefined;
@@ -142,6 +167,18 @@ export async function action({ request }) {
           );
         }
 
+        // Get existing lesson
+        const existingLesson = await lessonModel.findById(id);
+        if (!existingLesson) {
+          return Response.json(
+            { error: "Bài giảng không tồn tại" },
+            { status: 404 }
+          );
+        }
+
+        // Check permission: ADMIN/MANAGER delete tất cả, TEACHER chỉ delete của mình
+        requireDeletePermission(user, existingLesson);
+
         await lessonModel.delete(id);
 
         if (redirectUrl) {
@@ -168,7 +205,12 @@ export async function action({ request }) {
     }
   } catch (error) {
     console.error("Lesson action error:", error);
-    
+
+    // Handle authorization errors
+    if (error instanceof Response) {
+      throw error;
+    }
+
     // Handle specific validation errors
     if (error.message.includes("not found")) {
       return Response.json(
@@ -185,7 +227,7 @@ export async function action({ request }) {
     }
 
     return Response.json(
-      { 
+      {
         error: error.message || "Có lỗi xảy ra",
         details: process.env.NODE_ENV === 'development' ? error.toString() : undefined
       },
@@ -197,27 +239,38 @@ export async function action({ request }) {
 // Loader để lấy danh sách lessons
 export async function loader({ request }) {
   try {
-    const user = await getUser(request);
+    const user = await requireAuth(request);
     const lessonModel = new LessonModel();
-    
-    if (user?.id) {
-      const lessons = await lessonModel.findByOwnerId(Number(user.id));
-      return Response.json({ 
-        lessons,
-        user: {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-        }
-      });
-    }
 
-    const lessons = await lessonModel.findAll();
-    return Response.json({ lessons });
+    // Get owner filter dựa trên role
+    const ownerFilter = getOwnerFilter(user);
+    // ADMIN/MANAGER: {} (xem tất cả)
+    // TEACHER: { ownerId: user.id } (chỉ xem của mình)
+    // STUDENT: {} (xem tất cả, read-only)
+
+    const lessons = ownerFilter.ownerId
+      ? await lessonModel.findByOwnerId(ownerFilter.ownerId)
+      : await lessonModel.findAll();
+
+    return Response.json({
+      lessons,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      }
+    });
   } catch (error) {
     console.error("Lesson loader error:", error);
+
+    // Handle auth errors
+    if (error instanceof Response) {
+      throw error;
+    }
+
     return Response.json(
-      { 
+      {
         error: "Không thể tải danh sách bài giảng",
         details: process.env.NODE_ENV === 'development' ? error.message : undefined
       },
