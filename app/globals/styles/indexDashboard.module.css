@@ -199,13 +199,37 @@
     margin-bottom: 0;
 }
 
+.activityGroupHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #f3f4f6;
+}
+
 .activityGroupTitle {
     font-size: 1.125rem;
     font-weight: 600;
     color: #1a1a1a;
-    margin-bottom: 1rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 2px solid #f3f4f6;
+    margin: 0;
+}
+
+.viewAllLink {
+    background: none;
+    border: none;
+    color: #667eea;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+}
+
+.viewAllLink:hover {
+    background: rgba(102, 126, 234, 0.1);
+    color: #764ba2;
 }
 
 .activityList {
@@ -317,6 +341,25 @@
 .myContentLabel {
     font-size: 0.875rem;
     color: #6b7280;
+}
+
+.myContentViewBtn {
+    background: none;
+    border: 1px solid #667eea;
+    color: #667eea;
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.myContentViewBtn:hover {
+    background: #667eea;
+    color: white;
+    transform: translateY(-1px);
 }
 
 .viewAllButton {

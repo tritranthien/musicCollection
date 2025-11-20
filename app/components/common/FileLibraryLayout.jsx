@@ -21,7 +21,7 @@ const fileTypeMap = {
   "images": "image",
   "documents": "raw",
 }
-export default function FileLibraryPage({ files, fileType = "raw", classMate = null, accept = "*/*", category = null, pageName = "📁 Thư viện tệp" }) {
+export default function FileLibraryPage({ files, fileType = "raw", classMate = null, accept = "*/*", category = null, pageName = "📁 Thư viện tệp", extraData = {} }) {
   const location = useLocation();
   const [isModalOpen, setModalOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -42,7 +42,7 @@ export default function FileLibraryPage({ files, fileType = "raw", classMate = n
       classes: [],
       dateFrom: "",
       dateTo: "",
-      owner: "",
+      owner: extraData?.userName,
       category: "",
       minSize: "",
       maxSize: "",

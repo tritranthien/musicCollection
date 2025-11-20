@@ -4,8 +4,8 @@ import styles from "./DocumentFilter.module.css";
 
 export default function DocumentFilterAdvanced({
     activeFilters,
-    onFilterChange = () => {},
-    onReset = () => {},
+    onFilterChange = () => { },
+    onReset = () => { },
     hasActiveFilters = false,
     activeFilterCount = 0,
     isLoading = false,
@@ -24,7 +24,7 @@ export default function DocumentFilterAdvanced({
         }
         return null;
     }).filter((category) => category !== null);
-    const categories = [{value: 'all', label: 'Tất cả'}, ...categoryTemps ];
+    const categories = [{ value: 'all', label: 'Tất cả' }, ...categoryTemps];
     const isDisabled = (filter) => {
         return isLoading || disabledFilters.includes(filter);
     };
@@ -46,7 +46,7 @@ export default function DocumentFilterAdvanced({
 
         return () => clearTimeout(handler);
     }, [searchValue]);
-    
+
     const checkActiveFilterCount = () => {
         let count = 0;
         if (activeFilters.searchText.trim() && !disabledFilters.includes('searchText')) count++;

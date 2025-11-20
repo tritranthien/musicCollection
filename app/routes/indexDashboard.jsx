@@ -89,7 +89,7 @@ export default function IndexDashboard({ loaderData }) {
             <div className={styles.welcomeSection}>
                 <div className={styles.welcomeContent}>
                     <h1 className={styles.welcomeTitle}>👋 Xin chào, {user?.name || "Người dùng"}!</h1>
-                    <p className={styles.welcomeSubtitle}>Chào mừng bạn đến với Hệ thống Quản lý Tài liệu Văn học</p>
+                    <p className={styles.welcomeSubtitle}>Chào mừng bạn đến với Hệ thống Quản lý tài nguyên Âm Nhạc</p>
                 </div>
                 <div className={styles.roleBadge} style={{ backgroundColor: roleBadge.color }}>
                     {roleBadge.text}
@@ -141,46 +141,6 @@ export default function IndexDashboard({ loaderData }) {
                 )}
             </div>
 
-            {/* Quick Actions */}
-            {permissions.canCreate && (
-                <div className={styles.quickActionsSection}>
-                    <h2 className={styles.sectionTitle}>⚡ Hành động nhanh</h2>
-                    <div className={styles.quickActionsGrid}>
-                        <button
-                            className={styles.quickActionCard}
-                            onClick={() => navigate("/bang-dieu-khien/thong-tin-suu-tam/tao-moi")}
-                        >
-                            <Plus size={24} />
-                            <span>Tạo tài liệu mới</span>
-                        </button>
-
-                        <button
-                            className={styles.quickActionCard}
-                            onClick={() => navigate("/bang-dieu-khien/suu-tap/video")}
-                        >
-                            <Upload size={24} />
-                            <span>Upload file</span>
-                        </button>
-
-                        <button
-                            className={styles.quickActionCard}
-                            onClick={() => navigate("/bang-dieu-khien/chuong-trinh-hoc/bai-giang/create")}
-                        >
-                            <Edit size={24} />
-                            <span>Tạo bài giảng</span>
-                        </button>
-
-                        <button
-                            className={styles.quickActionCard}
-                            onClick={() => navigate("/bang-dieu-khien/tim-kiem")}
-                        >
-                            <Search size={24} />
-                            <span>Tìm kiếm</span>
-                        </button>
-                    </div>
-                </div>
-            )}
-
             {/* Main Content Grid */}
             <div className={styles.contentGrid}>
                 {/* Recent Activities */}
@@ -189,7 +149,15 @@ export default function IndexDashboard({ loaderData }) {
 
                     {/* Recent Documents */}
                     <div className={styles.activityGroup}>
-                        <h3 className={styles.activityGroupTitle}>📚 Tài liệu mới nhất</h3>
+                        <div className={styles.activityGroupHeader}>
+                            <h3 className={styles.activityGroupTitle}>📚 Tài liệu mới nhất</h3>
+                            <button
+                                className={styles.viewAllLink}
+                                onClick={() => navigate("/bang-dieu-khien/thong-tin-suu-tam")}
+                            >
+                                Xem tất cả →
+                            </button>
+                        </div>
                         {recentDocuments.length > 0 ? (
                             <div className={styles.activityList}>
                                 {recentDocuments.map((doc) => (
@@ -215,7 +183,15 @@ export default function IndexDashboard({ loaderData }) {
 
                     {/* Recent Files */}
                     <div className={styles.activityGroup}>
-                        <h3 className={styles.activityGroupTitle}>📂 Files mới nhất</h3>
+                        <div className={styles.activityGroupHeader}>
+                            <h3 className={styles.activityGroupTitle}>📂 Files mới nhất</h3>
+                            <button
+                                className={styles.viewAllLink}
+                                onClick={() => navigate("/bang-dieu-khien/suu-tap/video")}
+                            >
+                                Xem tất cả →
+                            </button>
+                        </div>
                         {recentFiles.length > 0 ? (
                             <div className={styles.activityList}>
                                 {recentFiles.map((file) => (
@@ -239,7 +215,15 @@ export default function IndexDashboard({ loaderData }) {
 
                     {/* Recent Lessons */}
                     <div className={styles.activityGroup}>
-                        <h3 className={styles.activityGroupTitle}>📖 Bài giảng mới nhất</h3>
+                        <div className={styles.activityGroupHeader}>
+                            <h3 className={styles.activityGroupTitle}>📖 Bài giảng mới nhất</h3>
+                            <button
+                                className={styles.viewAllLink}
+                                onClick={() => navigate("/bang-dieu-khien/chuong-trinh-hoc/bai-giang")}
+                            >
+                                Xem tất cả →
+                            </button>
+                        </div>
                         {recentLessons.length > 0 ? (
                             <div className={styles.activityList}>
                                 {recentLessons.map((lesson) => (
@@ -275,6 +259,12 @@ export default function IndexDashboard({ loaderData }) {
                                     <div className={styles.myContentValue}>{myDocuments.length}</div>
                                     <div className={styles.myContentLabel}>Tài liệu</div>
                                 </div>
+                                <button
+                                    className={styles.myContentViewBtn}
+                                    onClick={() => navigate("/bang-dieu-khien/thong-tin-suu-tam")}
+                                >
+                                    Xem →
+                                </button>
                             </div>
 
                             <div className={styles.myContentItem}>
@@ -283,6 +273,12 @@ export default function IndexDashboard({ loaderData }) {
                                     <div className={styles.myContentValue}>{myFiles.length}</div>
                                     <div className={styles.myContentLabel}>Files</div>
                                 </div>
+                                <button
+                                    className={styles.myContentViewBtn}
+                                    onClick={() => navigate("/bang-dieu-khien/tim-kiem?userName=" + user?.name)}
+                                >
+                                    Xem →
+                                </button>
                             </div>
 
                             <div className={styles.myContentItem}>
@@ -291,11 +287,14 @@ export default function IndexDashboard({ loaderData }) {
                                     <div className={styles.myContentValue}>{myLessons.length}</div>
                                     <div className={styles.myContentLabel}>Bài giảng</div>
                                 </div>
+                                <button
+                                    className={styles.myContentViewBtn}
+                                    onClick={() => navigate("/bang-dieu-khien/chuong-trinh-hoc/bai-giang")}
+                                >
+                                    Xem →
+                                </button>
                             </div>
 
-                            <button className={styles.viewAllButton} onClick={() => navigate("/bang-dieu-khien/tim-kiem")}>
-                                Xem tất cả →
-                            </button>
                         </div>
 
                         {/* System Status for Admin */}
