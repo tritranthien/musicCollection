@@ -32,12 +32,29 @@ export const links: Route.LinksFunction = () => [
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" style={{ colorScheme: 'light' }}>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="color-scheme" content="light" />
         <Meta />
         <Links />
+        <style dangerouslySetInnerHTML={{
+          __html: `
+            /* Force light mode - disable dark mode */
+            :root {
+              color-scheme: light only;
+            }
+            
+            /* Override any dark mode styles */
+            @media (prefers-color-scheme: dark) {
+              html, body {
+                background-color: #ffffff !important;
+                color: #000000 !important;
+              }
+            }
+          `
+        }} />
       </head>
       <body>
         {children}
