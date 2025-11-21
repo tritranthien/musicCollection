@@ -67,6 +67,15 @@ export default function LoginPage() {
             {errors.password && <p className={styles.error}>{errors.password.message}</p>}
           </div>
 
+          <div style={{ textAlign: "right", marginBottom: "1rem" }}>
+            <a
+              href="/forgot-password"
+              style={{ color: "#6b7280", fontSize: "0.875rem", textDecoration: "none" }}
+            >
+              Quên mật khẩu?
+            </a>
+          </div>
+
           {fetchError && <p className={styles.error}>{fetchError}</p>}
 
           <button type="submit" className={styles.button} disabled={isSubmitting}>

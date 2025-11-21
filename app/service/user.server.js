@@ -209,3 +209,34 @@ export const getUserStats = async () => {
         totalManagers,
     };
 };
+
+/**
+ * Cập nhật thông tin profile của user
+ */
+export const updateUserProfile = async (userId, data) => {
+    const { name } = data;
+
+    // Validate
+    if (!name || name.trim().length === 0) {
+        throw new Error("Tên không được để trống.");
+    }
+
+    // Update user
+    const updatedUser = await prisma.user.update({
+        where: { id: userId },
+        data: {
+            name: name.trim(),
+        },
+        select: {
+            id: true,
+            email: true,
+            name: true,
+            role: true,
+            status: true,
+            emailVerified: true,
+            createdAt: true,
+        },
+    });
+
+    return updatedUser;
+};

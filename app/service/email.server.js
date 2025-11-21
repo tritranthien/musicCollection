@@ -556,3 +556,125 @@ function getAdminNotificationTemplate(teacherName, teacherEmail, approvalUrl) {
   `;
 }
 
+/**
+ * Gửi email reset password
+ */
+export const sendPasswordResetEmail = async (email, name, resetToken) => {
+  const transporter = createTransporter();
+
+  if (!transporter) {
+    console.log(`📧 [DEV] Password reset email would be sent to: ${email}`);
+    console.log(`🔗 Reset Token: ${resetToken}`);
+    return { success: false, message: "SMTP not configured", resetToken };
+  }
+
+  const resetUrl = `${process.env.APP_URL || "http://localhost:5173"}/reset-password?token=${resetToken}`;
+
+  const mailOptions = {
+    from: `"${process.env.SMTP_FROM_NAME || "Music Collection"}" <${process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER}>`,
+    to: email,
+    subject: "🔑 Đặt lại mật khẩu - Music Collection",
+    html: getPasswordResetTemplate(name, resetUrl),
+    text: `
+Xin chào ${name},
+
+Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn.
+
+Vui lòng click vào link sau để đặt lại mật khẩu:
+${resetUrl}
+
+Link này sẽ hết hạn sau 1 giờ.
+
+Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này.
+
+Trân trọng,
+Music Collection Team
+    `,
+  };
+
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    console.log("✅ Password reset email sent:", info.messageId);
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error("❌ Error sending password reset email:", error);
+    throw new Error("Không thể gửi email. Vui lòng thử lại sau.");
+  }
+};
+
+function getPasswordResetTemplate(name, resetUrl) {
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Đặt lại mật khẩu</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f4; padding: 20px;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+          <!-- Header -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 40px 20px; text-align: center;">
+              <h1 style="color: #ffffff; margin: 0; font-size: 28px;">🔑 Đặt lại mật khẩu</h1>
+            </td>
+          </tr>
+          
+          <!-- Body -->
+          <tr>
+            <td style="padding: 40px 30px;">
+              <h2 style="color: #333333; margin: 0 0 20px 0;">Xin chào ${name}!</h2>
+              <p style="color: #666666; line-height: 1.6; margin: 0 0 20px 0;">
+                Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn.
+              </p>
+              <p style="color: #666666; line-height: 1.6; margin: 0 0 30px 0;">
+                Vui lòng click vào nút bên dưới để tạo mật khẩu mới:
+              </p>
+              
+              <!-- Button -->
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td align="center" style="padding: 20px 0;">
+                    <a href="${resetUrl}" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: #ffffff; padding: 15px 40px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
+                      Đặt lại mật khẩu
+                    </a>
+                  </td>
+                </tr>
+              </table>
+              
+              <p style="color: #999999; font-size: 14px; line-height: 1.6; margin: 20px 0 0 0;">
+                Hoặc copy link sau vào trình duyệt:<br>
+                <a href="${resetUrl}" style="color: #f5576c; word-break: break-all;">${resetUrl}</a>
+              </p>
+              
+              <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 4px;">
+                <p style="color: #856404; margin: 0; line-height: 1.6; font-size: 14px;">
+                  <strong>⚠️ Lưu ý:</strong> Link này sẽ hết hạn sau <strong>1 giờ</strong>.
+                </p>
+              </div>
+              
+              <p style="color: #999999; font-size: 14px; line-height: 1.6; margin: 20px 0 0 0;">
+                Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này. Mật khẩu của bạn sẽ không thay đổi.
+              </p>
+            </td>
+          </tr>
+          
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: #f8f9fa; padding: 20px 30px; text-align: center; border-top: 1px solid #e9ecef;">
+              <p style="color: #999999; font-size: 12px; margin: 0;">
+                © 2025 Music Collection. All rights reserved.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `;
+}
